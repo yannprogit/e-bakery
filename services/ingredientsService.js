@@ -3,7 +3,7 @@ const db = require('../models/index.js');
 
 //------------- Methods -------------
 
-//Return the list of customers
-exports.getCustomers = async () => {
-    return await db.customers.findAll();
+//Return the list of ingredients
+exports.getIngredients = async () => {
+    return await db.ingredients.findAll();
 }

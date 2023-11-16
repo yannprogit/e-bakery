@@ -1,21 +1,31 @@
+//Import
 const express = require('express');
-const OpenApiValidator = require('express-openapi-validator')
-const app = express();
-const port = 4250;
 
+//App
+const app = express();
 app.use(express.json());
 
-// Route handler
-app.get('/', (req, res) => {
-  res.send('Hello, Worgdrgdrgrdgld!');
-});
 
-app.use((error, req, res, next) => {
-  res.status(error.status || 500)
-    .json({ success: false, message: error.message, status: error.status });
-});
+const employeesRouter = require('./routers/employeesRouter.js');
+app.use('/employees', employeesRouter);
 
-// Start the server
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+const customersRouter = require('./routers/customersRouter.js');
+app.use('/customers', customersRouter);
+
+const ingredientsRouter = require('./routers/ingredientsRouter.js');
+app.use('/ingredients', ingredientsRouter);
+
+const foodsRouter = require('./routers/foodsRouter.js');
+app.use('/foods', foodsRouter);
+
+const buyRouter = require('./routers/buyRouter.js');
+app.use('/purchases', buyRouter);
+
+const containRouter = require('./routers/containRouter.js');
+app.use('/compositions', containRouter);
+
+const loginRouter = require('./routers/loginRouter.js')
+app.use('/login', loginRouter)
+
+//Export
+module.exports = app;

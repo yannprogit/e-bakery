@@ -13,7 +13,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express-openapi-validator": "^5.1.1",
     "express.js": "^1.0.0"
   }
 }
