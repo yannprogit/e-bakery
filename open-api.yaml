@@ -1,0 +1,711 @@
+openapi: 3.0.3
+info:
+  title: Swagger Petstore - OpenAPI 3.0
+  description : |- 
+    Something
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+tags:
+  - name : bakery
+    description : A e-commerce for bakery
+    externalDocs:
+      description: We sell prodcuts from a website
+      url: http://swagger.io
+paths:
+  /customers:
+    get:
+      tags:
+        - CustomerList
+      summary: Get all the customers
+      description: Return an array of customers
+      operationId: getAllCustomers
+      responses:
+      '200':
+        description: successful operation 
+        content: 
+          application/json:
+            schema:
+              $ref: '#componetns/schemas/CustomerList'
+      '400':
+        description: Sorry the list doesn't exist
+
+  /customers/{idCustomer}:
+    put:
+      tags:
+        - customer
+      summary: Update an existing customer
+      description: Update an existing customer by his id
+      operationId: updateCustomer
+      parameters:
+        - name: idCustomer
+          in: path
+          description: Id of customer to return
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        description: Update an existing customer in the list
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              shema:
+                $ref: '#/components/schemas/Customer'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Customer not found or doesn't exist
+        '405':
+          description: Validation exception
+
+    post:
+      tags:
+        - customer
+      summary: Add a new customer to the website
+      description: Add a new customer to the website
+      operationId: addCustomer
+      requestBody:
+        description: Create a new customer in the website
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+        required: true
+      responses:
+        '200':
+          description: New customer successfully added to the list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'          
+        '405':
+          description: Invalid input
+
+    delete:
+      tags:
+        - customer
+      summary: Delete a customer
+      description: delete a customer
+      operationId: deleteCustomer
+      requestBody: 
+          description: Delete an existing customer 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+          required: true
+        responses: 
+          '200':
+            description: Customer deleted successfully
+            content: 
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Customer'
+          '404':
+            description: Customer not found or doesn't exist
+  
+
+  /employees:
+    get:
+      tags:
+        - EmployeesList
+      summary: Get all the employees
+      description: Return an array of employees
+      operationId: getAllEmployees
+      responses:
+      '200':
+        description: successful operation 
+        content: 
+          application/json:
+            schema:
+              $ref: '#componetns/schemas/EmployeesList'
+      '400':
+        description: Sorry the list doesn't exist
+
+  /employees/{idEmployee}:
+    put:
+      tags:
+        - employee
+      summary: Update an existing employees
+      description: Update an existing employees by his id
+      operationId: updateEmployee
+      parameters:
+        - name: idEmployee
+          in: path
+          description: Id of employee to return
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        description: Update an existing employee in the list
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Employee'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              shema:
+                $ref: '#/components/schemas/Employee'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Employee not found or doesn't exist
+        '405':
+          description: Validation exception
+
+    post:
+      tags:
+        - employee
+      summary: Add a new employee to the website
+      description: Add a new employee to the website
+      operationId: addEmployee
+      requestBody:
+        description: Create a new employee in the website
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Employee'
+        required: true
+      responses:
+        '200':
+          description: New employee successfully added to the list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'          
+        '405':
+          description: Invalid input
+
+    delete:
+      tags:
+        - employee
+      summary: Delete a employee
+      description: delete a employee
+      operationId: deleteEmployee
+      requestBody: 
+          description: Delete an existing employee 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+          required: true
+        responses: 
+          '200':
+            description: Employee deleted successfully
+            content: 
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Employee'
+          '404':
+            description: Employee not found or doesn't exist
+
+
+  /foods:
+    get:
+      tags:
+        - FoodsList
+      summary: Get all the foods
+      description: Return an array of foods
+      operationId: getAllFoods
+      responses:
+      '200':
+        description: successful operation 
+        content: 
+          application/json:
+            schema:
+              $ref: '#componetns/schemas/FoodsList'
+      '400':
+        description: Sorry the list doesn't exist
+
+  /foods/{idFood}:
+    put:
+      tags:
+        - food
+      summary: Update an existing food
+      description: Update an existing food by his id
+      operationId: updateFood
+      parameters:
+        - name: idFood
+          in: path
+          description: Id of food to return
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        description: Update an existing food in the list
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Food'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              shema:
+                $ref: '#/components/schemas/Food'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Food not found or doesn't exist
+        '405':
+          description: Validation exception
+
+    post:
+      tags:
+        - food
+      summary: Add a new food to the website
+      description: Add a new food to the website
+      operationId: addFood
+      requestBody:
+        description: Create a new food in the website
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Food'
+        required: true
+      responses:
+        '200':
+          description: New food successfully added to the list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Food'          
+        '405':
+          description: Invalid input
+
+    delete:
+      tags:
+        - food
+      summary: Delete a food
+      description: delete a food
+      operationId: deleteFood
+      requestBody: 
+          description: Delete an existing food 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Food'
+          required: true
+        responses: 
+          '200':
+            description: Food deleted successfully
+            content: 
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Food'
+          '404':
+            description: Food not found or doesn't exist
+
+
+  /ingredients:
+    get:
+      tags:
+        - ingredientsList
+      summary: Get all the ingredients
+      description: Return an array of ingredients
+      operationId: getAllIngredients
+      responses:
+      '200':
+        description: successful operation 
+        content: 
+          application/json:
+            schema:
+              $ref: '#componetns/schemas/IngredientsList'
+      '400':
+        description: Sorry the list doesn't exist
+
+  /ingredients/{idIngredient}:
+    put:
+      tags:
+        - ingredient
+      summary: Update an existing ingredient
+      description: Update an existing ingredient by his id
+      operationId: updateIngredient
+      parameters:
+        - name: idFoods
+          in: path
+          description: Id of food to return
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        description: Update an existing ingredient in the list
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Ingredient'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              shema:
+                $ref: '#/components/schemas/Ingredient'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Ingredient not found or doesn't exist
+        '405':
+          description: Validation exception
+
+    post:
+      tags:
+        - ingredient
+      summary: Add a new ingredient to the website
+      description: Add a new ingredient to the website
+      operationId: addIngredient
+      requestBody:
+        description: Create a new ingredient in the website
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Ingredient'
+        required: true
+      responses:
+        '200':
+          description: New ingredient successfully added to the list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ingredient'          
+        '405':
+          description: Invalid input
+
+    delete:
+      tags:
+        - ingredient
+      summary: Delete a ingredient
+      description: delete a ingredient
+      operationId: deleteIngredient
+      requestBody: 
+          description: Delete an existing ingredient 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ingredient'
+          required: true
+        responses: 
+          '200':
+            description: Ingredient deleted successfully
+            content: 
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Ingredient'
+          '404':
+            description: Ingredient not found or doesn't exist
+
+
+  /buys:
+    get:
+      tags:
+        - BuysList
+      summary: Get all the buys
+      description: Return an array of buys
+      operationId: getAllBuys
+      responses:
+      '200':
+        description: successful operation 
+        content: 
+          application/json:
+            schema:
+              $ref: '#componetns/schemas/BuysList'
+      '400':
+        description: Sorry the list doesn't exist
+
+  /buys/{idBuy}:
+    put:
+      tags:
+        - buy
+      summary: Update an existing buy
+      description: Update an existing buy by his id
+      operationId: updateBuy
+      parameters:
+        - name: idBuy
+          in: path
+          description: Id of buy to return
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        description: Update an existing buy in the list
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Buy'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              shema:
+                $ref: '#/components/schemas/Buy'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Buy not found or doesn't exist
+        '405':
+          description: Validation exception
+
+    post:
+      tags:
+        - buy
+      summary: Add a new buy to the website
+      description: Add a new buy to the website
+      operationId: addBuy
+      requestBody:
+        description: Create a new buy in the website
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Buy'
+        required: true
+      responses:
+        '200':
+          description: New buy successfully added to the list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Buy'          
+        '405':
+          description: Invalid input
+
+    delete:
+      tags:
+        - buy
+      summary: Delete a buy
+      description: delete a buy
+      operationId: deleteBuy
+      requestBody: 
+          description: Delete an existing buy 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Buy'
+          required: true
+        responses: 
+          '200':
+            description: Buy deleted successfully
+            content: 
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Buy'
+          '404':
+            description: Buy not found or doesn't exist
+  
+
+
+  /contains:
+    get:
+      tags:
+        - ContainsList
+      summary: Get all the contains
+      description: Return an array of contains
+      operationId: getAllContains
+      responses:
+      '200':
+        description: successful operation 
+        content: 
+          application/json:
+            schema:
+              $ref: '#componetns/schemas/ContainsList'
+      '400':
+        description: Sorry the list doesn't exist
+
+  /contains/{idContain}:
+    put:
+      tags:
+        - contain
+      summary: Update an existing contain
+      description: Update an existing contain by his id
+      operationId: updateContain
+      parameters:
+        - name: idContain
+          in: path
+          description: Id of contain to return
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        description: Update an existing contain in the list
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Contain'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              shema:
+                $ref: '#/components/schemas/Contain'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Contain not found or doesn't exist
+        '405':
+          description: Validation exception
+
+    post:
+      tags:
+        - contain
+      summary: Add a new contain to the website
+      description: Add a new contain to the website
+      operationId: addContain
+      requestBody:
+        description: Create a new contain in the website
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Contain'
+        required: true
+      responses:
+        '200':
+          description: New contain successfully added to the list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contain'          
+        '405':
+          description: Invalid input
+
+    delete:
+      tags:
+        - contain
+      summary: Delete a contain
+      description: delete a contain
+      operationId: deleteContain
+      requestBody: 
+          description: Delete an existing contain 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contain'
+          required: true
+        responses: 
+          '200':
+            description: Contain deleted successfully
+            content: 
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Contain'
+          '404':
+            description: Buy not found or doesn't exist
+
+
+components:
+  schemas:
+    customerList:
+      type: array
+      itmes:
+        $ref: '#/components/schemas/Customer'
+    Customer:
+      type: object
+      properties:
+        idCustomer:
+          type: integer
+        firstname:
+          type: string
+        lastname:
+          type: string
+
+
+    EmployeesList:
+      type: array
+      itmes:
+        $ref: '#/components/schemas/Employee'
+    Employee:
+      type: object
+      properties:
+        idEmployee:
+          type: integer
+        firstname:
+          type: string
+        lastname:
+          type: string
+        role:
+          type: string
+
+    FoodsList:
+      type: array
+      itmes:
+        $ref: '#/components/schemas/Food'
+    Food:
+      type: object
+      properties:
+        idFood:
+          type: integer
+        name:
+          type: string
+        price:
+          type: number 
+
+    IngredientsList:
+      type: array
+      itmes:
+        $ref: '#/components/schemas/Ingredient'
+    Ingredient:
+      type: object
+      properties:
+        idIngredient:
+          type: integer
+        name:
+          type: string
+
+    BuysList:
+      type: array
+      itmes:
+        $ref: '#/components/schemas/Buy'
+    Buy:
+      type: object
+      properties:
+        idBuy:
+          type: integer
+        customerId:
+          type: string
+        employeeID:
+          type: string
+        foodId:
+          type: string
+        date:
+          type: string
+          fromat: date
+
+    ContainsList:
+      type: array
+      itmes:
+        $ref: '#/components/schemas/Contain'
+    Contain:
+      type: object
+      properties:
+        idContain:
+          type: integer
+        foodId:
+          type: string
+        ingredientID:
+          type: string
