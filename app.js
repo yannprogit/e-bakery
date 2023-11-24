@@ -1,11 +1,11 @@
 //Import
 const express = require('express');
 const { Sequelize } = require('sequelize');
-const employeeModel = require('./models/employeesModel.js');
-const customerModel = require('./models/customersModel.js');
-//const foodModel = require('./models/foodsModel.js');
-//const ingredientModel = require('./models/ingredientsModel.js');
-//const buyModel = require('./models/buysModel.js');
+const employeesModel = require('./models/employeesModel.js');
+const customersModel = require('./models/customersModel.js');
+const foodsModel = require('./models/foodsModel.js');
+const ingredientsModel = require('./models/ingredientsModel.js');
+//const buyModel = require('./models/buyModel.js');
 
 const config = require('./config/config.json');
 
@@ -19,8 +19,11 @@ const env = process.env.NODE_ENV || 'development';
 const sequelize = new Sequelize(config[env]);
 
 
-const employee = employeeModel(sequelize);
-const customer = customerModel(sequelize);
+const employee = employeesModel(sequelize);
+const customer = customersModel(sequelize);
+const food = foodsModel(sequelize);
+const ingredient = ingredientsModel(sequelize);
+//const buy = buyModel(sequelize);
 
 //Database
 sequelize.sync({ force: true })
