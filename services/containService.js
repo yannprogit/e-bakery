@@ -3,7 +3,7 @@ const db = require('../models/index.js');
 
 //------------- Methods -------------
 
-//Return the list of employees
-exports.getEmployees = async () => {
-    return await db.employees.findAll();
+//Return the list of compositions
+exports.getCompositions = async () => {
+    return await db.contain.findAll();
 }

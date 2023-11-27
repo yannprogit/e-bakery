@@ -14,6 +14,18 @@ db.sequelize.sync({force: true}).then(async () => {
     { id: 5, name: 'manager' },
   ]);
 
+    //Add ingredients
+    await db.ingredients.bulkCreate([
+      { name: 'Levure' },
+      { name: 'Sel' },
+      { name: 'Eau' },
+      { name: 'Farine' },
+      { name: 'Sucre' },
+      { name: 'Pâte feuilleté' },
+      { name: 'Chocolat' },
+      { name: 'Oeuf' },
+    ]);
+
   //Add employees
   await db.employees.bulkCreate([
     {
@@ -67,8 +79,16 @@ db.sequelize.sync({force: true}).then(async () => {
     price: 3.50,
   });
 
+  //Add in contain
+  await db.contain.bulkCreate([
+    { foodId: 1, ingredientId: 1 },
+    { foodId: 1, ingredientId: 2 },
+    { foodId: 1, ingredientId: 3 },
+    { foodId: 1, ingredientId: 4 },
+  ]);
+
   app.listen(port, () => {
-    console.log('Server is running on http://localhost:', port);
+    console.log('Server is running on http://localhost:' + port);
   });
 }).catch((e) => {
   console.error(e);

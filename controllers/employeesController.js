@@ -1,8 +1,9 @@
 //------------- Import -------------
-const { getEmployees } = require('./services/employeesService.js');
+const { getEmployees } = require('../services/employeesService.js');
 
 //------------- Methods -------------
 //Get the list of employees
-exports.getEmployees = (req, res) => {
-    res.json(getEmployees()).send();
+exports.getEmployees = async (req, res) => {
+    const employees = await getEmployees();
+    res.json({success: true, data: employees});
 }
