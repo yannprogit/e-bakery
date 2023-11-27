@@ -14,26 +14,14 @@ module.exports = (sequelize) => {
     customerId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: 'customers',
-        key: 'id', 
-      },
     },
     foodId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: 'foods',
-        key: 'id', 
-      },
     },
-    employeeId: {
+    deliverymanId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: 'employees',
-        key: 'id', 
-      },
     },
   }, {
     tableName: 'buy',

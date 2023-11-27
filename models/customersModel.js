@@ -24,16 +24,6 @@ module.exports = (sequelize) => {
       allowNull: false,
     }, 
   });
-
-    //Add clients
-    sequelize.sync().then(() => {
-      customer.create({
-        firstname: 'Klie',
-        lastname: 'Yen',
-        mail: 'klie.yen@gmail.com',
-        password: 'motdepasse',
-      });
-    });
   
     return customer;
 };
