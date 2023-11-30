@@ -3,6 +3,8 @@ const express = require('express');
 
 //App
 const app = express();
+app.use(express.json());
+
 
 const employeesRouter = require('./routers/employeesRouter.js');
 app.use('/employees', employeesRouter);
@@ -21,6 +23,9 @@ app.use('/purchases', buyRouter);
 
 const containRouter = require('./routers/containRouter.js');
 app.use('/compositions', containRouter);
+
+const loginRouter = require('./routers/loginRouter.js')
+app.use('/login', loginRouter)
 
 //Export
 module.exports = app;

@@ -1,5 +1,6 @@
 const app = require('./app');
 const db = require('./models/index.js');
+const bcrypt = require('bcrypt');
 const port = 8000;
 
 db.sequelize.sync({force: true}).then(async () => {
@@ -32,35 +33,35 @@ db.sequelize.sync({force: true}).then(async () => {
       firstname: 'Hamp',
       lastname: 'Loyé',
       mail: 'hamp.loye@gmail.com',
-      password: 'mdp2',
+      password: await bcrypt.hash('mdp', 10),
       role: 3,
     },
     {
       firstname: 'Yacowan',
       lastname: 'Keebrady',
       mail: 'yacowan.keebrady@gmail.com',
-      password: 'mdp1',
+      password: await bcrypt.hash('mdp', 10),
       role: 1,
     },
     {
       firstname: 'Ali',
       lastname: 'Expe-Rèss',
       mail: 'ali.er@gmail.com',
-      password: 'mdp3',
+      password: await bcrypt.hash('mdp', 10),
       role: 2,
     },
     {
       firstname: 'Pix',
       lastname: 'Sous',
       mail: 'pix.sous@gmail.com',
-      password: 'mdp4',
+      password: await bcrypt.hash('mdp', 10),
       role: 4,
     },
     {
       firstname: 'Mana',
       lastname: 'Jeur',
       mail: 'mana.jeur@gmail.com',
-      password: 'mdp5',
+      password: await bcrypt.hash('mdp', 10),
       role: 5,
     },
   ]);
@@ -70,7 +71,7 @@ db.sequelize.sync({force: true}).then(async () => {
     firstname: 'Klie',
     lastname: 'Yen',
     mail: 'klie.yen@gmail.com',
-    password: 'mdp1',
+    password: await bcrypt.hash('mdp', 10),
   });
 
   //Add food

@@ -7,7 +7,7 @@ module.exports = (sequelize) => {
       primaryKey: true,
       autoIncrement: true,
     },
-    date: {
+    dueDate: {
       type: DataTypes.DATE,
       allowNull: false,
     },
@@ -25,6 +25,5 @@ module.exports = (sequelize) => {
     },
   }, {
     tableName: 'buy',
-    timestamps: false
   })
 };
