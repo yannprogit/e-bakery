@@ -315,8 +315,7 @@ paths:
                   $ref: '#/components/schemas/Food'
           '404':
             description: Food not found or doesn't exist
-
-
+            
   /ingredients:
     get:
       tags:
