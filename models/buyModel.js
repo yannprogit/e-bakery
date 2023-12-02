@@ -23,6 +23,9 @@ module.exports = (sequelize) => {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    deliveryDate: {
+      type: DataTypes.DATE,
+    },
   }, {
     tableName: 'buy',
   })

@@ -16,3 +16,12 @@ exports.getRole = async (id) => {
 
     return role.name;
 }
+
+//Return the list of specific employees by their role
+exports.getEmployeesByRole = async (id) => {
+    return await db.employees.findAll({
+        where: {
+            role: id
+        }
+    });
+}
