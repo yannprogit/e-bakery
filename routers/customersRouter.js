@@ -4,6 +4,22 @@ const customerController = require('../controllers/customersController');
 const { authMiddleware } = require('../controllers/loginController');
 
 //------------- Routes -------------
-router.get('/', customerController.getCustomers);
+router.get('/', authMiddleware(['admin']), (req, res) => {
+    customerController.getCustomers(req, res);
+});
+
+router.post('/', customerController.addCustomer);
+
+router.get('/:id', authMiddleware(['admin', 'customer']), (req, res) => {
+    customerController.getCustomerById(req, res, req.user.id, req.user.role);
+});
+
+router.delete('/:id', authMiddleware(['admin', 'customer']), (req, res) => {
+    customerController.deleteCustomerById(req, res, req.user.id, req.user.role);
+});
+
+router.put('/:id', authMiddleware(['admin', 'customer']), (req, res) => {
+    customerController.updateCustomerById(req, res, req.user.id, req.user.role);
+});
 
 module.exports = router;

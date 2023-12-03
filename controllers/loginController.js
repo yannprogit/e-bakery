@@ -4,7 +4,7 @@ const { getRole } = require('../services/employeesService.js');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
 
-exports.authMiddleware = async (req, res, next) => {
+exports.authMiddleware = (allowedRoles) => (req, res, next) => {
     const token = req.header('Authorization');
 
     if (req.headers && !req.headers.authorization) {
@@ -17,6 +17,9 @@ exports.authMiddleware = async (req, res, next) => {
         }
 
         req.user = user;
+        if (!allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({ success: false, message: 'Access forbidden' });
+        }
         next();
     });
 }

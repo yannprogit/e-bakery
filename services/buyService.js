@@ -11,10 +11,10 @@ exports.getPurchases = async () => {
 //Add a purchase
 exports.addBuy = (dueDate, customerId, foodId, deliverymanId) => {
     return db.buy.create({
-        dueDate: dueDate,
-        customerId: customerId,
-        foodId: foodId,
-        deliverymanId: deliverymanId
+        dueDate,
+        customerId,
+        foodId,
+        deliverymanId
     });
 }
 

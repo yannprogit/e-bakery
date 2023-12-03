@@ -68,7 +68,7 @@ exports.updateDeliveryDate = async (req, res, deliverymanId) => {
         res.status(422).json({success: false, message: "The delivery of this buy is already finished" });
     }
     else if (buy.deliverymanId != deliverymanId) {
-        res.status(401).json({ success: false, message: 'Access forbidden6' });
+        res.status(401).json({ success: false, message: 'Access forbidden' });
     }
     else {
         await updateDeliveryDate(req.params.id);
