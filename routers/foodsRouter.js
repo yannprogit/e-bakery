@@ -1,7 +1,7 @@
 //------------- Import -------------
 const router = require('express').Router();
 const foodController = require('../controllers/foodsController');
-
+const { authMiddleware } = require('../controllers/loginController');
 //------------- Routes -------------
 router.get('/', foodController.getFoods);
 
