@@ -4,7 +4,7 @@ const { getRole } = require('../services/employeesService.js');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
 
-exports.authMiddleware = async (req, res, next) => {
+exports.authMiddleware = (allowedRoles) => (req, res, next) => {
     const token = req.header('Authorization');
 
     if (req.headers && !req.headers.authorization) {
@@ -17,14 +17,17 @@ exports.authMiddleware = async (req, res, next) => {
         }
 
         req.user = user;
+        if (!allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({ success: false, message: 'Access forbidden' });
+        }
         next();
     });
 }
 
 exports.login = async (req, res) => {
-    if (req.body.mail && req.body.password && req.body.status) {
+    if (req.body.mail && req.body.password && req.body.role) {
         let user;
-        let role = req.body.status.toLowerCase();
+        let role = req.body.role.toLowerCase();
         if (role=="customer") {
             user = await db.customers.findOne({
                 where: {mail: req.body.mail}
@@ -34,10 +37,12 @@ exports.login = async (req, res) => {
             user = await db.employees.findOne({
                 where: {mail: req.body.mail}
             });
-            role = await getRole(user.role);
+            if (user) {
+                role = await getRole(user.role);
+            } 
         }
         else {
-            return res.status(400).json({success: false, message: 'The status must be customer or employee'});
+            return res.status(400).json({success: false, message: 'The role must be customer or employee'});
         }
 
         if (user) {
@@ -53,6 +58,6 @@ exports.login = async (req, res) => {
         }
 
     } else {
-        return res.status(400).json({success: false, message: 'mail, password and status are required'});
+        return res.status(400).json({success: false, message: 'mail, password and role are required'});
     }
 }

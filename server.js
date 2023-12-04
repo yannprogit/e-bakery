@@ -51,9 +51,9 @@ db.sequelize.sync({force: true}).then(async () => {
       role: 2,
     },
     {
-      firstname: 'Pix',
-      lastname: 'Sous',
-      mail: 'pix.sous@gmail.com',
+      firstname: 'Pie',
+      lastname: 'Ksou',
+      mail: 'pie.ksou@gmail.com',
       password: await bcrypt.hash('mdp', 10),
       role: 4,
     },
@@ -63,6 +63,20 @@ db.sequelize.sync({force: true}).then(async () => {
       mail: 'mana.jeur@gmail.com',
       password: await bcrypt.hash('mdp', 10),
       role: 5,
+    },
+    {
+      firstname: 'Hubert',
+      lastname: 'Ite',
+      mail: 'hubert.ite@gmail.com',
+      password: await bcrypt.hash('mdp', 10),
+      role: 2,
+    },
+    {
+      firstname: 'Délie',
+      lastname: 'Vérroux',
+      mail: 'delie.verroux@gmail.com',
+      password: await bcrypt.hash('mdp', 10),
+      role: 2,
     },
   ]);
 
