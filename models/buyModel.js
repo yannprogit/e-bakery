@@ -26,6 +26,11 @@ module.exports = (sequelize) => {
     deliveryDate: {
       type: DataTypes.DATE,
     },
+    status: {
+      type: DataTypes.ENUM('cart', 'paid'),
+      allowNull: false,
+      defaultValue: 'cart',
+    },
   }, {
     tableName: 'buy',
   })

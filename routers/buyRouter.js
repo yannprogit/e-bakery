@@ -4,17 +4,19 @@ const buyController = require('../controllers/buyController');
 const { authMiddleware } = require('../controllers/loginController');
 
 //------------- Routes -------------
-router.get('/', buyController.getPurchases);
+router.get('/', authMiddleware(['admin', 'cashier']), (req, res) => {
+    buyController.getPurchases(req, res);
+});
 
 router.post('/', authMiddleware(['customer']), (req, res) => {
     buyController.addBuy(req, res);
 });
 
-router.get('/:id', authMiddleware(['customer', 'deliveryman']), (req, res) => {
+router.get('/:id', authMiddleware(['customer', 'deliveryman', 'admin']), (req, res) => {
     buyController.getBuyById(req, res, req.user.id, req.user.role);
 });
 
-router.delete('/:id', authMiddleware(['customer']), (req, res) => {
+router.delete('/:id', authMiddleware(['customer', 'admin']), (req, res) => {
     buyController.deleteBuyById(req, res, req.user.id);
 });
 

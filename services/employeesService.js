@@ -11,7 +11,9 @@ exports.getEmployees = async () => {
 exports.getRole = async (id) => {
     const role = await db.roles.findOne({
         attributes: ['name'],
-        where: {id: id}
+        where: {
+            id
+        }
     });
 
     return role.name;

@@ -12,14 +12,12 @@ exports.getPurchases = async (req, res) => {
 
 //Add a buy
 exports.addBuy = async (req, res) => {
-    let dueDate = new Date();
-    dueDate.setDate(dueDate.getDate() + 3);
     const food = await getFoodById(req.body.foodId);
     if (food!=null) {
         const deliverymen = await getEmployeesByRole(2);
         const deliverymenIds = deliverymen.map(deliveryman => deliveryman.id);
         const randomIndex = Math.floor(Math.random() * deliverymenIds.length);
-        const buy = await addBuy(dueDate,req.user.id, req.body.foodId, deliverymenIds[randomIndex]);
+        const buy = await addBuy(req.user.id, req.body.foodId, deliverymenIds[randomIndex]);
         res.status(201).json({success: true, buy: buy});
     } else {
         res.status(404).json({success: false, message: "This food doesn't exist"});

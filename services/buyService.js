@@ -8,8 +8,11 @@ exports.getPurchases = async () => {
     return await db.buy.findAll();
 }
 
-//Add a purchase
-exports.addBuy = (dueDate, customerId, foodId, deliverymanId) => {
+//Add a purchase (logic with stock)
+exports.addBuy = (customerId, foodId, deliverymanId) => {
+    let dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 3);
+
     return db.buy.create({
         dueDate,
         customerId,

@@ -57,7 +57,7 @@ exports.updateCustomerById = async (req, res, id, role) => {
     else if (role=="admin") {
         const customer = await updateCustomerByAdmin(req.params.id, req.body.firstname, req.body.lastname, req.body.mail, req.body.password);
         if (customer) {
-            res.status(204).send(); 
+            res.status(204).send();
         }
         else {
             res.status(400).json({success: false, message: "Error when updating this customer, verify your args"});

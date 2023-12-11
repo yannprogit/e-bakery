@@ -9,13 +9,24 @@ exports.getCustomers = async () => {
 }
 
 //Add a customer
-exports.addCustomer = (firstname, lastname, mail, password) => {
-    return db.customers.create({
-        firstname,
-        lastname,
-        mail,
-        password
+exports.addCustomer = async (firstname, lastname, mail, password) => {
+    const mailExist = await db.customers.findOne({
+        where: {
+            mail
+        }
     });
+    if (!mailExist) {
+        return db.customers.create({
+            firstname,
+            lastname,
+            mail,
+            password
+        });
+    }
+    else {
+        return false;
+    }
+
 }
 
 //Return the customer by its id
@@ -38,6 +49,12 @@ exports.deleteCustomerById = (id) => {
 
 //Update the customer by its id
 exports.updateCustomerByAdmin = async (id, firstname, lastname, mail, password) => {
+    const mailExist = await db.customers.findOne({
+        where: {
+            mail
+        }
+    });
+    if (!mailExist) {
     return await db.customers.update({
         firstname,
         lastname,
@@ -48,6 +65,10 @@ exports.updateCustomerByAdmin = async (id, firstname, lastname, mail, password) 
             id
         }
     });
+    }
+    else {
+        return false;
+    }
 }
 
 //Update the customer by its id (if is the customer who update his account)

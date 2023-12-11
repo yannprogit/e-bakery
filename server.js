@@ -10,7 +10,7 @@ db.sequelize.sync({force: true}).then(async () => {
   await db.roles.bulkCreate([
     { id: 1, name: 'admin' },
     { id: 2, name: 'deliveryman' },
-    { id: 3, name: 'cook' },
+    { id: 3, name: 'baker' },
     { id: 4, name: 'cashier' },
     { id: 5, name: 'manager' },
   ]);
