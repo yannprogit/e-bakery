@@ -49,7 +49,34 @@ exports.addEmployee = (firstname, lastname, mail, password, role) => {
 }
 
 //Delete the employee by its id
-exports.deleteEmployeeById = (id) => {
+exports.deleteEmployeeById = async (id) => {
+    const employee = await db.employees.findOne({
+        where: {
+            id
+        }
+    });
+
+    if (employee.role==2) {
+        const deliveryInProgress = await db.buy.findOne({
+            where: {
+                deliverymanId: id,
+                validation: false,
+                status: "paid"
+            }
+        });
+
+        if (deliveryInProgress) {
+            return false;
+        }
+        await db.buy.update({
+            deliverymanId: null
+        }, 
+        { where: {
+                deliverymanId: id
+            }
+        });
+    }
+
     return db.employees.destroy({
         where: {
             id

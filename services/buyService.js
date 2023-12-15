@@ -8,16 +8,11 @@ exports.getPurchases = async () => {
     return await db.buy.findAll();
 }
 
-//Add a purchase (logic with stock)
-exports.addBuy = (customerId, foodId, deliverymanId) => {
-    let dueDate = new Date();
-    dueDate.setDate(dueDate.getDate() + 3);
-
+//Add a purchase (in cart)
+exports.addBuy = (customerId, foodId) => {
     return db.buy.create({
-        dueDate,
         customerId,
         foodId,
-        deliverymanId
     });
 }
 
@@ -50,4 +45,52 @@ exports.updateDeliveryDate = async (id) => {
             id
         }
     });
+}
+
+//Update the status for a buy by its id
+exports.updateStatus = async (id) => {
+    const deliverymen = await db.employees.findAll({
+        where: {
+            role: 2
+        }
+    });
+
+    const deliverymenIds = deliverymen.map(deliveryman => deliveryman.id);
+    const randomIndex = Math.floor(Math.random() * deliverymenIds.length);
+
+    let dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 3);
+
+    return await db.buy.update({
+        status: "paid",
+        deliverymanId: deliverymenIds[randomIndex],
+        dueDate
+    }, 
+    { where: {
+            id
+        }
+    });
+}
+
+//Update the validation for a buy by its id
+exports.updateValidation = async (id) => {
+    const buy = await db.buy.findOne({
+        where: {
+            id
+        }
+    });
+
+    if (buy.validation==false) {
+        return await db.buy.update({
+            validation: true 
+        }, 
+        { where: {
+                id
+            }
+        });
+    }
+    else {
+        return false;
+    }
+
 }

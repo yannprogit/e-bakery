@@ -20,8 +20,8 @@ router.delete('/:id', authMiddleware(['customer', 'admin']), (req, res) => {
     buyController.deleteBuyById(req, res, req.user.id);
 });
 
-router.put('/:id', authMiddleware(['deliveryman']), (req, res) => {
-    buyController.updateDeliveryDate(req, res, req.user.id);
+router.put('/:id', authMiddleware(['deliveryman','customer','admin']), (req, res) => {
+    buyController.updateBuyById(req, res, req.user.id, req.user.role);
 });
 
 module.exports = router;

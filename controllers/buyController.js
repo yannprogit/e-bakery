@@ -1,7 +1,6 @@
 //------------- Import -------------
-const { getPurchases, addBuy, getBuyById, deleteBuyById, updateDeliveryDate } = require('../services/buyService.js');
+const { getPurchases, addBuy, getBuyById, deleteBuyById, updateDeliveryDate, updateStatus, updateValidation } = require('../services/buyService.js');
 const { getFoodById } = require('../services/foodsService.js');
-const { getEmployeesByRole } = require('../services/employeesService.js');
 
 //------------- Methods -------------
 //Get the list of purchases
@@ -14,10 +13,7 @@ exports.getPurchases = async (req, res) => {
 exports.addBuy = async (req, res) => {
     const food = await getFoodById(req.body.foodId);
     if (food!=null) {
-        const deliverymen = await getEmployeesByRole(2);
-        const deliverymenIds = deliverymen.map(deliveryman => deliveryman.id);
-        const randomIndex = Math.floor(Math.random() * deliverymenIds.length);
-        const buy = await addBuy(req.user.id, req.body.foodId, deliverymenIds[randomIndex]);
+        const buy = await addBuy(req.user.id, req.body.foodId);
         res.status(201).json({success: true, buy: buy});
     } else {
         res.status(404).json({success: false, message: "This food doesn't exist"});
@@ -44,8 +40,8 @@ exports.deleteBuyById = async (req, res, customerId) => {
     if (buy==null) {
         res.status(404).json({success: false, message: "This buy doesn't exist"});
     }
-    else if (buy.deliveryDate==null) {
-        res.status(422).json({success: false, message: "The delivery of this buy is still in progress" });
+    else if (buy.status!="cart") {
+        res.status(422).json({success: false, message: "This buy cannot be delete because it has been paid" });
     }
     else if (buy.customerId != customerId) {
         res.status(401).json({ success: false, message: 'Access forbidden' });
@@ -57,19 +53,41 @@ exports.deleteBuyById = async (req, res, customerId) => {
 }
 
 //Update the deliveryDate of buy
-exports.updateDeliveryDate = async (req, res, deliverymanId) => {
+exports.updateBuyById = async (req, res, id, role) => {
     const buy = await getBuyById(req.params.id);
     if (buy==null) {
         res.status(404).json({success: false, message: "This buy doesn't exist"});
     }
-    else if (buy.deliveryDate != null) {
-        res.status(422).json({success: false, message: "The delivery of this buy is already finished" });
-    }
-    else if (buy.deliverymanId != deliverymanId) {
+    else if ((role=="customer" && buy.customerId != id)||(role=="deliveryman" && buy.deliverymanId != id)) {
         res.status(401).json({ success: false, message: 'Access forbidden' });
     }
     else {
-        await updateDeliveryDate(req.params.id);
-        res.status(204).send();
-     }
+        if (role=="deliveryman") {
+            if (buy.deliveryDate != null) {
+                res.status(422).json({success: false, message: "The delivery of this buy is already finished" });
+            }
+            else {
+                await updateDeliveryDate(req.params.id);
+                res.status(204).send(); 
+            }
+        }
+        else {
+            if (buy.status == "cart") {
+                await updateStatus(req.params.id);
+                res.status(204).send(); 
+            }
+            else if (buy.deliveryDate==null) {
+                res.status(422).json({success: false, message: "The delivery of this buy is still in progress" });
+            }
+            else {
+                const validation = await updateValidation(req.params.id);
+                if (!validation) {
+                    res.status(422).json({success: false, message: "You have already confirmed delivery" });
+                }
+                else {
+                    res.status(204).send();   
+                }  
+            }
+        }
+    }
 }

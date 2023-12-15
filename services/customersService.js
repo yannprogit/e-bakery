@@ -39,12 +39,40 @@ exports.getCustomerById = async (id) => {
 }
 
 //Delete the customer by its id
-exports.deleteCustomerById = (id) => {
-    return db.customers.destroy({
+exports.deleteCustomerById = async (id) => {
+    const deliveryInProgress = await db.buy.findOne({
         where: {
-            id
+            customerId: id,
+            validation: false,
+            status: "paid"
         }
     });
+
+    if (!deliveryInProgress) {
+        db.buy.destroy({
+            where: {
+                customerId: id,
+                status: "cart"
+            }
+        });
+
+        await db.buy.update({
+            customerId: null
+        }, 
+        { where: {
+                customerId: id
+            }
+        });
+
+        return db.customers.destroy({
+            where: {
+                id
+            }
+        });
+    }
+    else {
+        return false;
+    }
 }
 
 //Update the customer by its id

@@ -43,8 +43,13 @@ exports.deleteCustomerById = async (req, res, id, role) => {
         res.status(401).json({ success: false, message: 'Access forbidden' });
     }
     else {
-        deleteCustomerById(req.params.id);
-        res.status(204).send();
+        const deletedCustomer = await deleteCustomerById(req.params.id);
+        if (deletedCustomer) {
+            res.status(204).send();
+        }
+        else {
+            res.status(422).json({success: false, message: "It would appear that you still have deliveries in progress"});
+        }
      }
 }
 

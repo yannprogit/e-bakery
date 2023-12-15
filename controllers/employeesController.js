@@ -44,12 +44,17 @@ exports.deleteEmployeeById = async (req, res, id, role) => {
     if (employee==null) {
         res.status(404).json({success: false, message: "This employee doesn't exist"});
     }
-    else if ((employee.id != id && role != "admin" && !(role == "manager" && employee.id == id)) || (role == "manager" && [1, 5].includes(employee.role))) 
+    else if (role == "manager" && [1, 5].includes(employee.role)) 
     {
         res.status(401).json({ success: false, message: 'Access forbidden' });
     }
     else {
-        deleteEmployeeById(req.params.id);
-        res.status(204).send();
+        const deletedEmployee = await deleteEmployeeById(req.params.id);
+        if (deletedEmployee) {
+            res.status(204).send();
+        }
+        else {
+            res.status(422).json({success: false, message: "This deliveryman has unfinished deliveries"});
+        }
      }
 }
