@@ -7,13 +7,18 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express-openapi-validator": "^5.1.1",
-    "express.js": "^1.0.0"
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.3.1",
+    "express-openapi-validator": "^5.1.2",
+    "express.js": "^1.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.6.5",
+    "sequelize": "^6.35.1"
   }
 }

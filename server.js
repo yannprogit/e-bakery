@@ -3,6 +3,7 @@ const db = require('./models/index.js');
 const bcrypt = require('bcrypt');
 const port = 8000;
 
+
 db.sequelize.sync({force: true}).then(async () => {
   console.log('Database connected and synchronized');
 
