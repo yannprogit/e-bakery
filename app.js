@@ -5,6 +5,8 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
+const axiosRouter = require('./routers/axiosRouter.js');
+app.use('/populate-db', axiosRouter);
 
 const employeesRouter = require('./routers/employeesRouter.js');
 app.use('/employees', employeesRouter);
