@@ -39,6 +39,12 @@ exports.login = async (req, res) => {
             });
             if (user) {
                 role = await getRole(user.role);
+
+                let today = new Date();
+                let endContract = user.endContract ? new Date(user.endContract) : null;
+                if ((endContract!=null)&&(today>endContract)) {
+                    return res.status(422).json({success: false, message: 'Your contract has expired, you can no longer connect'});
+                }
             } 
         }
         else {

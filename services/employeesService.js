@@ -124,7 +124,7 @@ exports.updateEmployeeByEmployee = async (id, mail, password) => {
 
 //Update the date of end of contract of employee by its id
 exports.updateEndContract = async (id, endContract) => {
-    const deliveriesInProgress = await db.buy.findAll({
+    const deliveryInProgress = await db.buy.findOne({
         where: {
             deliverymanId: id,
             [Op.or]: [
@@ -134,7 +134,7 @@ exports.updateEndContract = async (id, endContract) => {
         }
     });
 
-    if (deliveriesInProgress) {
+    if (deliveryInProgress) {
         return "deliveriesInProgress";
     }
 
