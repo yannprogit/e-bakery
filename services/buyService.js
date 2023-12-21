@@ -10,10 +10,11 @@ exports.getPurchases = async () => {
 }
 
 //Add a purchase (in cart)
-exports.addBuy = (customerId, foodId) => {
+exports.addBuy = (customerId, foodId, qty) => {
     return db.buy.create({
         customerId,
         foodId,
+        qty,
     });
 }
 
@@ -50,6 +51,8 @@ exports.updateDeliveryDate = async (id) => {
 
 //Update the status for a buy by its id
 exports.updateStatus = async (id, hour) => {
+    //add here a verification of stock
+    
     //Assign date of delivery
     let dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + 4);

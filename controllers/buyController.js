@@ -13,7 +13,7 @@ exports.getPurchases = async (req, res) => {
 exports.addBuy = async (req, res) => {
     const food = await getFoodById(req.body.foodId);
     if (food!=null) {
-        const buy = await addBuy(req.user.id, req.body.foodId);
+        const buy = await addBuy(req.user.id, req.body.foodId, req.body.qty);
         res.status(201).json({success: true, buy: buy});
     } else {
         res.status(404).json({success: false, message: "This food doesn't exist"});

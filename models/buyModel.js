@@ -33,6 +33,10 @@ module.exports = (sequelize) => {
       allowNull: false,
       defaultValue: false,
     },
+    qty: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
   }, {
     tableName: 'buy',
   })
