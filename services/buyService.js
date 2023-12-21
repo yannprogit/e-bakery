@@ -48,7 +48,20 @@ exports.updateDeliveryDate = async (id) => {
 }
 
 //Update the status for a buy by its id
-exports.updateStatus = async (id) => {
+exports.updateStatus = async (id, hour) => {
+    //Assign date of delivery
+    let dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + 4);
+    const [hours, minutes] = hour.split(':');
+    dueDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+    //Assign deliveryman
+    const buy = await db.buy.findOne({
+        where: {
+            id
+        }
+    });
+
     const deliverymen = await db.employees.findAll({
         where: {
             role: 2
@@ -56,20 +69,50 @@ exports.updateStatus = async (id) => {
     });
 
     const deliverymenIds = deliverymen.map(deliveryman => deliveryman.id);
-    const randomIndex = Math.floor(Math.random() * deliverymenIds.length);
 
-    let dueDate = new Date();
-    dueDate.setDate(dueDate.getDate() + 3);
+    if (deliverymenIds.length == 0) {
+        return false;
+    } else {
+        let selectedDeliverymanId;
 
-    return await db.buy.update({
-        status: "paid",
-        deliverymanId: deliverymenIds[randomIndex],
-        dueDate
-    }, 
-    { where: {
-            id
+        //Check if the deliveryman has already made a delivery to the same customer on the same date
+        const existingDelivery = await db.buy.findOne({
+            where: {
+                dueDate,
+                customerId: buy.customerId
+            }
+        });
+
+        if (existingDelivery) { //If this is the case, we will assign it to this deliveryman, as he will be able to deliver them all to the customer at once.
+            selectedDeliverymanId = existingDelivery.deliverymanId;
+        } else { //Else, we will choose randomly an available deliveryman
+            const purchases = await db.buy.findAll({
+                where: {
+                    dueDate
+                }
+            });
+            const busyDeliverymenIds = purchases.map(buy => buy.deliverymanId);
+            const availableDeliverymenIds = deliverymenIds.filter(deliverymanId => !busyDeliverymenIds.includes(deliverymanId));
+
+            if (availableDeliverymenIds.length == 0) {
+                return false;
+            }
+
+            const randomIndex = Math.floor(Math.random() * availableDeliverymenIds.length);
+            selectedDeliverymanId = availableDeliverymenIds[randomIndex];
         }
-    });
+
+        //Update the buy
+        return await db.buy.update({
+            status: "paid",
+            deliverymanId: selectedDeliverymanId,
+            dueDate
+        }, 
+        { where: {
+                id
+            }
+        });
+    }
 }
 
 //Update the validation for a buy by its id

@@ -52,7 +52,7 @@ exports.deleteBuyById = async (req, res, customerId) => {
      }
 }
 
-//Update the deliveryDate of buy
+//Update the deliveryDate for a deliveryman or for a customer, pay or valid the delivery of buy
 exports.updateBuyById = async (req, res, id, role) => {
     const buy = await getBuyById(req.params.id);
     if (buy==null) {
@@ -73,11 +73,23 @@ exports.updateBuyById = async (req, res, id, role) => {
         }
         else {
             if (buy.status == "cart") {
-                await updateStatus(req.params.id);
-                res.status(204).send(); 
+                const pattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+                const hour = req.body.hour;
+                if (!pattern.test(hour)) {
+                    res.status(422).json({success: false, message: "The time you have entered is incorrect, please enter a valid time (format: hour:min)" });
+                }
+                else {
+                    const statusUpdated = await updateStatus(req.params.id, hour);
+                    if (!statusUpdated) {
+                        res.status(422).json({success: false, message: "No deliverymen available, please change delivery hour or order later" });
+                    }
+                    else {
+                        res.status(204).send();                         
+                    }
+                }
             }
             else if (buy.deliveryDate==null) {
-                res.status(422).json({success: false, message: "The delivery of this buy is still in progress" });
+                res.status(422).json({success: false, message: "You cannot valid the delivery because this buy is still in progress" });
             }
             else {
                 const validation = await updateValidation(req.params.id);
