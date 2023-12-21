@@ -1,5 +1,6 @@
 //------------- Import -------------
 const db = require('../models/index.js');
+const { Op } = require('sequelize');
 
 //------------- Methods -------------
 
@@ -64,7 +65,11 @@ exports.updateStatus = async (id, hour) => {
 
     const deliverymen = await db.employees.findAll({
         where: {
-            role: 2
+            role: 2,
+            [Op.or]: [
+                { endContract: { [Op.gt]: dueDate } },
+                { endContract: null }
+            ]
         }
     });
 

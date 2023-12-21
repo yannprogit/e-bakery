@@ -36,4 +36,8 @@ router.delete('/:id', authMiddleware(['admin', 'manager']), (req, res) => {
     employeesController.deleteEmployeeById(req, res, req.user.id, req.user.role);
 });
 
+router.put('/:id', authMiddleware(['admin', 'manager', 'deliveryman', 'cashier', 'baker']), (req, res) => {
+    employeesController.updateEmployeeById(req, res, req.user.id, req.user.role);
+});
+
 module.exports = router;

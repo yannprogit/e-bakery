@@ -1,5 +1,5 @@
 //------------- Import -------------
-const { getEmployees, getEmployeesByRole, addEmployee, deleteEmployeeById, getEmployeeById } = require('../services/employeesService.js');
+const { getEmployees, getEmployeesByRole, addEmployee, deleteEmployeeById, getEmployeeById, updateEndContract } = require('../services/employeesService.js');
 
 //------------- Methods -------------
 //Get the list of employees
@@ -14,7 +14,7 @@ exports.getEmployeesByRole = async (req, res, id) => {
     res.status(200).json({success: true, data: employees});
 }
 
-//Get a customer
+//Get an employee
 exports.getEmployeeById = async (req, res, id, role) => {
     const employee = await getEmployeeById(req.params.id);
     if (employee==null) {
@@ -28,7 +28,7 @@ exports.getEmployeeById = async (req, res, id, role) => {
      }
 }
 
-//Add a employee
+//Add an employee
 exports.addEmployee = async (req, res) => {
     const employee = await addEmployee(req.body.firstname, req.body.lastname, req.body.mail, await bcrypt.hash(req.body.password, 10), req.body.role);
     if (employee) {
@@ -38,7 +38,7 @@ exports.addEmployee = async (req, res) => {
     }
  }
 
-//Delete a employee
+//Delete an employee
 exports.deleteEmployeeById = async (req, res, id, role) => {
     const employee = await getEmployeeById(req.params.id);
     if (employee==null) {
@@ -56,5 +56,46 @@ exports.deleteEmployeeById = async (req, res, id, role) => {
         else {
             res.status(422).json({success: false, message: "This deliveryman has unfinished deliveries"});
         }
+     }
+}
+
+//Update an employee
+exports.updateEmployeeById = async (req, res, id, role) => {
+    const employee = await getEmployeeById(req.params.id);
+    if (employee==null) {
+        res.status(404).json({success: false, message: "This employee doesn't exist"});
+    }
+    else if (role=="admin") {
+        const employee = await updateEmployeeByAdmin(req.params.id, req.body.firstname, req.body.lastname, req.body.mail, req.body.password);
+        if (employee) {
+            res.status(204).send();
+        }
+        else {
+            res.status(400).json({success: false, message: "Error when updating this employee, verify your args"});
+        }
+    }
+    else if (role=="manager") {
+        const employee = await updateEndContract(req.params.id, req.body.endContract);
+        if (!employee) {
+            res.status(400).json({success: false, message: "Error when updating this employee, you must enter a valid date"});
+        }
+        else if (employee == "deliveriesInProgress") {
+            res.status(422).json({success: false, message: "Deliveries are scheduled after the new contract end date"});
+        }
+        else {
+            res.status(204).send(); 
+        }
+    }
+    else if (employee.id==id) {
+        const employee = await updateEmployeeByEmployee(req.params.id, req.body.mail, req.body.password);
+        if (employee) {
+            res.status(204).send(); 
+        }
+        else {
+            res.status(400).json({success: false, message: "Error when updating this employee, verify your args"});
+        }
+    }
+    else {
+        res.status(401).json({ success: false, message: 'Access forbidden' });
      }
 }

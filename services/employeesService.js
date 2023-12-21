@@ -1,5 +1,6 @@
 //------------- Import -------------
 const db = require('../models/index.js');
+const { Op } = require('sequelize');
 
 //------------- Methods -------------
 //Return the list of employees
@@ -79,6 +80,68 @@ exports.deleteEmployeeById = async (id) => {
 
     return db.employees.destroy({
         where: {
+            id
+        }
+    });
+}
+
+//Update the employee by its id (by admin)
+exports.updateEmployeeByAdmin = async (id, firstname, lastname, mail, password, role) => {
+    const mailExist = await db.employees.findOne({
+        where: {
+            mail
+        }
+    });
+    if (!mailExist) {
+    return await db.employees.update({
+        firstname,
+        lastname,
+        mail,
+        password,
+        role
+    }, 
+    { where: {
+            id
+        }
+    });
+    }
+    else {
+        return false;
+    }
+}
+
+//Update the employee by its id (if is the employee who update his account)
+exports.updateEmployeeByEmployee = async (id, mail, password) => {
+    return await db.employees.update({
+        mail,
+        password
+    }, 
+    { where: {
+            id
+        }
+    });
+}
+
+//Update the date of end of contract of employee by its id
+exports.updateEndContract = async (id, endContract) => {
+    const deliveriesInProgress = await db.buy.findAll({
+        where: {
+            deliverymanId: id,
+            [Op.or]: [
+                { dueDate: { [Op.gt]: endContract } },
+                { validation: false }
+            ]
+        }
+    });
+
+    if (deliveriesInProgress) {
+        return "deliveriesInProgress";
+    }
+
+    return await db.employees.update({
+        endContract
+    }, 
+    { where: {
             id
         }
     });
