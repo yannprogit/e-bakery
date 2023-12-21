@@ -86,6 +86,9 @@ db.sequelize.sync({force: true}).then(async () => {
     lastname: 'Yen',
     mail: 'klie.yen@gmail.com',
     password: await bcrypt.hash('mdp', 10),
+    zipCode: 75600,
+    address: "8 rue de la merguez",
+    town: "Paris",
   });
 
   //Add food

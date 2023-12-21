@@ -24,6 +24,18 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false,
     }, 
+    zipCode: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    address: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    town: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   });
   
     return customer;

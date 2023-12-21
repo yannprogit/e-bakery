@@ -11,7 +11,7 @@ exports.getCustomers = async (req, res) => {
 
 //Add a customer
 exports.addCustomer = async (req, res) => {
-    const customer = await addCustomer(req.body.firstname, req.body.lastname, req.body.mail, await bcrypt.hash(req.body.password, 10));
+    const customer = await addCustomer(req.body.firstname, req.body.lastname, req.body.mail, await bcrypt.hash(req.body.password, 10), req.body.zipCode, req.body.adress, req.body.town);
     if (customer) {
         res.status(201).json({success: true, customer: customer});
     } else {
@@ -60,7 +60,7 @@ exports.updateCustomerById = async (req, res, id, role) => {
         res.status(404).json({success: false, message: "This customer doesn't exist"});
     }
     else if (role=="admin") {
-        const customer = await updateCustomerByAdmin(req.params.id, req.body.firstname, req.body.lastname, req.body.mail, req.body.password);
+        const customer = await updateCustomerByAdmin(req.params.id, req.body.firstname, req.body.lastname, req.body.mail, req.body.password, req.body.zipCode, req.body.adress, req.body.town);
         if (customer) {
             res.status(204).send();
         }
@@ -69,7 +69,7 @@ exports.updateCustomerById = async (req, res, id, role) => {
         }
     }
     else if (role=="customer"&&customer.id==id) {
-        const customer = await updateCustomerByCustomer(req.params.id, req.body.mail, req.body.password);
+        const customer = await updateCustomerByCustomer(req.params.id, req.body.mail, req.body.password, req.body.zipCode, req.body.adress, req.body.town);
         if (customer) {
             res.status(204).send(); 
         }
