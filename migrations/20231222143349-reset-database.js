@@ -1,17 +1,12 @@
 'use strict';
+const db = require('../models/index.js');
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
-    
-    await queryInterface.bulkDelete('buy', null);
-    await queryInterface.bulkDelete('contain', null);
-    await queryInterface.bulkDelete('foods', null);
-    await queryInterface.bulkDelete('ingredients', null);
-    await queryInterface.bulkDelete('customers', null);
-    await queryInterface.bulkDelete('employees', {
-      id: {
-        [Sequelize.Op.not]: 1
-      }
-    });
+  up: async () => {
+    await db.sequelize.drop();
+    await db.sequelize.sync({ force: true });
+
+    await require('../seeders/20231222021145-roles-seed').up(db.sequelize.getQueryInterface());
+    await require('../seeders/20231222022250-admin-seed').up(db.sequelize.getQueryInterface());
   }
 };

@@ -1,7 +1,6 @@
 //------------------------ Import ------------------------
 const app = require('./app');
 const db = require('./models/index.js');
-const bcrypt = require('bcrypt');
 
 //------------------------ init port ------------------------
 const port = 8000;

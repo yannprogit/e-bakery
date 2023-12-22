@@ -22,9 +22,12 @@ exports.populateDatabase = async (req, res) => {
     const customers = await axios.get('https://little-api.vercel.app/customers');
     const employees = await axios.get('https://little-api.vercel.app/employees');
     const purchases = await axios.get('https://little-api.vercel.app/purchases');
+    const foods = await axios.get('https://little-api.vercel.app/foods');
+    const ingredients = await axios.get('https://little-api.vercel.app/ingredients');
+    const compositions = await axios.get('https://little-api.vercel.app/compositions');
 
     //Code to add these data in db
-    if (customers && customers.data && employees && employees.data && purchases && purchases.data) {
+    if (customers && customers.data && employees && employees.data && purchases && purchases.data && ingredients && ingredients.data && foods && foods.data && compositions && compositions.data) {
         //init data
         const customerData = customers.data;
         const employeeData = employees.data;
@@ -43,9 +46,12 @@ exports.populateDatabase = async (req, res) => {
         //Create data in database
         const resultCustomers = await db.customers.bulkCreate(customerData);
         const resultEmployees = await db.employees.bulkCreate(employeeData);
+        const resultFoods = await db.foods.bulkCreate(foods.data);
+        const resultIngredients = await db.ingredients.bulkCreate(ingredients.data);
+        const resultCompositions = await db.contain.bulkCreate(compositions.data);
         const resultPurchases = await db.buy.bulkCreate(purchases.data);
 
-        if (resultCustomers && resultEmployees && resultPurchases) {
+        if (resultCustomers && resultEmployees && resultPurchases && resultCompositions && resultFoods && resultIngredients) {
             res.status(201).json({ success: true });
         }
         else {
