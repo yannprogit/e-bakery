@@ -1,5 +1,8 @@
 //-------------------- Import --------------------
 const axios = require('axios');
+const db = require('../models/index.js');
+const bcrypt = require('bcrypt');
+const { Sequelize } = require('sequelize');
 
 //-------------------- Functions --------------------
 exports.getExternFoods = async (req, res) => {
@@ -8,5 +11,47 @@ exports.getExternFoods = async (req, res) => {
         res.json(result.data);
     } else {
         res.status(400).json({success: false, message: 'Cannot get foods result'});
+    }
+}
+
+exports.populateDatabase = async (req, res) => {
+    //Reset of database
+    await require('../migrations/20231222143349-reset-database').up(db.sequelize.getQueryInterface(), Sequelize);
+
+    //Get extern data
+    const customers = await axios.get('https://little-api.vercel.app/customers');
+    const employees = await axios.get('https://little-api.vercel.app/employees');
+    const purchases = await axios.get('https://little-api.vercel.app/purchases');
+
+    //Code to add these data in db
+    if (customers && customers.data && employees && employees.data && purchases && purchases.data) {
+        //init data
+        const customerData = customers.data;
+        const employeeData = employees.data;
+
+        //hash password for customers and employees
+        for (const customer of customerData) {
+ 
+            const hashedPassword = await bcrypt.hash(customer.password, 10);
+            customer.password = hashedPassword;
+        }
+        for (const employee of employeeData) {
+            const hashedPassword = await bcrypt.hash(employee.password, 10);
+            employee.password = hashedPassword;
+        }
+
+        //Create data in database
+        const resultCustomers = await db.customers.bulkCreate(customerData);
+        const resultEmployees = await db.employees.bulkCreate(employeeData);
+        const resultPurchases = await db.buy.bulkCreate(purchases.data);
+
+        if (resultCustomers && resultEmployees && resultPurchases) {
+            res.status(201).json({ success: true });
+        }
+        else {
+            res.status(500).json({ success: false, message: 'Error populating database' });
+        }
+    } else {
+        res.status(400).json({success: false, message: 'Cannot get results of extern data'});
     }
 }

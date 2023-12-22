@@ -6,4 +6,8 @@ router.get('/foods', authMiddleware(['admin']), (req, res) => {
     axiosController.getExternFoods(req, res);
 });
 
+router.post('/', authMiddleware(['admin']), (req, res) => {
+    axiosController.populateDatabase(req, res);
+});
+
 module.exports = router;
