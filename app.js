@@ -1,7 +1,7 @@
-//Import
+//------------------------ Import ------------------------
 const express = require('express');
 
-//App
+//------------------------ App ------------------------
 const app = express();
 app.use(express.json());
 
