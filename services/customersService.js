@@ -9,7 +9,7 @@ exports.getCustomers = async () => {
 }
 
 //Add a customer
-exports.addCustomer = async (firstname, lastname, mail, password, zipCode, adress, town) => {
+exports.addCustomer = async (firstname, lastname, mail, password, zipCode, address, town) => {
     const mailExist = await db.customers.findOne({
         where: {
             mail
@@ -22,7 +22,7 @@ exports.addCustomer = async (firstname, lastname, mail, password, zipCode, adres
             mail,
             password,
             zipCode,
-            adress,
+            address,
             town
         });
     }
@@ -79,7 +79,7 @@ exports.deleteCustomerById = async (id) => {
 }
 
 //Update the customer by its id
-exports.updateCustomerByAdmin = async (id, firstname, lastname, mail, password, zipCode, adress, town) => {
+exports.updateCustomerByAdmin = async (id, firstname, lastname, mail, password, zipCode, address, town) => {
     const mailExist = await db.customers.findOne({
         where: {
             mail
@@ -92,7 +92,7 @@ exports.updateCustomerByAdmin = async (id, firstname, lastname, mail, password, 
         mail,
         password,
         zipCode,
-        adress,
+        address,
         town
     }, 
     { where: {
@@ -106,12 +106,12 @@ exports.updateCustomerByAdmin = async (id, firstname, lastname, mail, password, 
 }
 
 //Update the customer by its id (if is the customer who update his account)
-exports.updateCustomerByCustomer = async (id, mail, password, zipCode, adress, town) => {
+exports.updateCustomerByCustomer = async (id, mail, password, zipCode, address, town) => {
     return await db.customers.update({
         mail,
         password,
         zipCode,
-        adress,
+        address,
         town
     }, 
     { where: {

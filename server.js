@@ -10,6 +10,11 @@ const port = 8000;
 db.sequelize.sync({force: false}).then(async () => {
   console.log('Database connected and synchronized');
 
+  const roles = await db.roles.findAll();
+  if (roles.length == 0) {
+    await require('./seeders/20231222021145-roles-seed').up(db.sequelize.getQueryInterface());
+  }
+
   const admin = await db.employees.findOne({
     where: {
         id: 1
@@ -17,11 +22,6 @@ db.sequelize.sync({force: false}).then(async () => {
   });
   if (!admin) {
     await require('./seeders/20231222022250-admin-seed').up(db.sequelize.getQueryInterface());
-  }
-  
-  const roles = await db.roles.findAll();
-  if (roles.length == 0) {
-    await require('./seeders/20231222021145-roles-seed').up(db.sequelize.getQueryInterface());
   }
   
   app.listen(port, () => {
