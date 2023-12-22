@@ -8,7 +8,7 @@ exports.authMiddleware = (allowedRoles) => (req, res, next) => {
     const token = req.header('Authorization');
 
     if (req.headers && !req.headers.authorization) {
-        return res.status(401).json({ success: false, message: 'Access forbidden' });
+        return res.status(401).json({ success: false, message: 'Access forbidden: You must be logged in to do this' });
     }
 
     jwt.verify(token, process.env.secretKey, async (err, user) => {
@@ -18,7 +18,7 @@ exports.authMiddleware = (allowedRoles) => (req, res, next) => {
 
         req.user = user;
         if (!allowedRoles.includes(req.user.role)) {
-            return res.status(403).json({ success: false, message: 'Access forbidden' });
+            return res.status(403).json({ success: false, message: 'Access forbidden: You are not allowed to do that with your role' });
         }
         next();
     });

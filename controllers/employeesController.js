@@ -5,7 +5,7 @@ const { getEmployees, getEmployeesByRole, addEmployee, deleteEmployeeById, getEm
 //Get the list of employees
 exports.getEmployees = async (req, res) => {
     const employees = await getEmployees();
-    res.json({success: true, data: employees});
+    res.status(200).json({success: true, data: employees});
 }
 
 //Get the list of employees by their role
@@ -21,7 +21,7 @@ exports.getEmployeeById = async (req, res, id, role) => {
         res.status(404).json({success: false, message: "This employee doesn't exist"});
     }
     else if ((employee.id != id && role != "admin" && !(role == "manager" && employee.id == id)) || (role == "manager" && [1, 5].includes(employee.role)))  {
-        res.status(401).json({ success: false, message: 'Access forbidden' });
+        res.status(401).json({ success: false, message: 'Access forbidden: You cannot view an account that does not belong to you' });
     }
     else {
         res.status(200).json({success: true, data: employee});
@@ -46,7 +46,7 @@ exports.deleteEmployeeById = async (req, res, id, role) => {
     }
     else if (role == "manager" && [1, 5].includes(employee.role)) 
     {
-        res.status(401).json({ success: false, message: 'Access forbidden' });
+        res.status(401).json({ success: false, message: "Access forbidden: You cannot delete another manager's account or admin's account" });
     }
     else {
         const deletedEmployee = await deleteEmployeeById(req.params.id);
@@ -96,6 +96,6 @@ exports.updateEmployeeById = async (req, res, id, role) => {
         }
     }
     else {
-        res.status(401).json({ success: false, message: 'Access forbidden' });
+        res.status(401).json({ success: false, message: 'Access forbidden: You cannot modify an account that does not belong to you' });
      }
 }

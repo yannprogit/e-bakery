@@ -6,7 +6,7 @@ const { getFoodById } = require('../services/foodsService.js');
 //Get the list of purchases
 exports.getPurchases = async (req, res) => {
     const buy = await getPurchases();
-    res.json({success: true, data: buy});
+    res.status(200).json({success: true, data: buy});
 }
 
 //Add a buy
@@ -27,10 +27,10 @@ exports.getBuyById = async (req, res, id, role) => {
         res.status(404).json({success: false, message: "This buy doesn't exist"});
     }
     else if ((role=="customer" && buy.customerId != id)||(role=="deliveryman" && buy.deliverymanId != id)) {
-        res.status(401).json({ success: false, message: 'Access forbidden' });
+        res.status(401).json({ success: false, message: 'Access forbidden: You cannot view an order that does not belong to you' });
     }
     else {
-        res.json({success: true, data: buy});
+        res.status(200).json({success: true, data: buy});
      }
 }
 
@@ -43,8 +43,8 @@ exports.deleteBuyById = async (req, res, customerId) => {
     else if (buy.status!="cart") {
         res.status(422).json({success: false, message: "This buy cannot be delete because it has been paid" });
     }
-    else if (buy.customerId != customerId) {
-        res.status(401).json({ success: false, message: 'Access forbidden' });
+    else if ((buy.customerId != customerId)&&(role!="admin")) {
+        res.status(401).json({ success: false, message: 'Access forbidden: You cannot delete an order that does not belong to you' });
     }
     else {
         deleteBuyById(req.params.id);
@@ -59,9 +59,20 @@ exports.updateBuyById = async (req, res, id, role) => {
         res.status(404).json({success: false, message: "This buy doesn't exist"});
     }
     else if ((role=="customer" && buy.customerId != id)||(role=="deliveryman" && buy.deliverymanId != id)) {
-        res.status(401).json({ success: false, message: 'Access forbidden' });
+        res.status(401).json({ success: false, message: 'Access forbidden: You cannot update an order that does not belong to you' });
     }
     else {
+        //We assign a false role to the admin depending on the progress of the order
+        if (role=="admin") {
+            if (buy.deliveryDate!=null||buy.status=="cart") {
+                role = "customer"; 
+            }
+            else {
+                role = "deliveryman";
+            }
+        }
+        
+        //Update depending of role
         if (role=="deliveryman") {
             if (buy.deliveryDate != null) {
                 res.status(422).json({success: false, message: "The delivery of this buy is already finished" });
@@ -89,7 +100,7 @@ exports.updateBuyById = async (req, res, id, role) => {
                 }
             }
             else if (buy.deliveryDate==null) {
-                res.status(422).json({success: false, message: "You cannot valid the delivery because this buy is still in progress" });
+                res.status(422).json({success: false, message: "You cannot validate the delivery because this buy is still in progress" });
             }
             else {
                 const validation = await updateValidation(req.params.id);
