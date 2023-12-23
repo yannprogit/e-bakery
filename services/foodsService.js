@@ -9,10 +9,12 @@ exports.getFoods = async () => {
 }
 
 //Add a food
-exports.addFood = (name, price) => {
+exports.addFood = (name, price, description, stock) => {
     return db.foods.create({
         name,
-        price
+        price,
+        description,
+        stock
     });
 }
 
@@ -33,10 +35,36 @@ exports.deleteFoodById = (id) => {
     });
 }
 
-//Update the food by its id
-exports.updateFoodById = async (id, name, price) => {
+//Update the food by admin
+exports.updateFoodByAdmin = async (id, name, price, description, stock) => {
     return await db.foods.update({
         name,
+        price,
+        description,
+        stock
+    }, 
+    { where: {
+            id
+        }
+    });
+}
+
+//Update the food by baker
+exports.updateFoodByBaker = async (id, name, description, stock) => {
+    return await db.foods.update({
+        name,
+        description,
+        stock
+    }, 
+    { where: {
+            id
+        }
+    });
+}
+
+//Update the price of food
+exports.updatePrice = async (id, price) => {
+    return await db.foods.update({
         price
     }, 
     { where: {

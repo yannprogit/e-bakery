@@ -15,7 +15,14 @@ module.exports = (sequelize) => {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    stock: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
   });
-  
     return food;
 };

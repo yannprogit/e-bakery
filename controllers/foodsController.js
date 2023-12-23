@@ -1,7 +1,5 @@
 //------------- Import -------------
-const { getFoods } = require('../services/foodsService.js');
-
-
+const { getFoods, addFood, getFoodById, deleteFoodById, updateFoodByAdmin, updatePrice, updateFoodByBaker } = require('../services/foodsService.js');
 
 //------------- Methods -------------
 //Get the list of foods
@@ -12,7 +10,7 @@ exports.getFoods = async (req, res) => {
 
 //Add a food
 exports.addFood = async (req, res) => {
-    const food = await this.addFood(req.body.name, req.body.price);
+    const food = await addFood(req.body.name, req.body.price, req.body.description, req.body.stock);
     if (food) {
         res.status(201).json({success: true, food: food});
     } 
@@ -22,13 +20,10 @@ exports.addFood = async (req, res) => {
  }
 
 //Get a food
-exports.getFoodById = async (req, res, id, role) => {
+exports.getFoodById = async (req, res) => {
     const food = await getFoodById(req.params.id);
     if (food==null) {
         res.status(404).json({success: false, message: "This food doesn't exist"});
-    }
-    else if ((food.id != id)&&(role!="admin")) {
-        res.status(401).json({ success: false, message: 'Access forbidden' });
     }
     else {
         res.status(200).json({success: true, data: food});
@@ -36,13 +31,10 @@ exports.getFoodById = async (req, res, id, role) => {
 }
 
 //Delete a food
-exports.deleteFoodById = async (req, res, id, role) => {
+exports.deleteFoodById = async (req, res) => {
     const food = await getFoodById(req.params.id);
     if (food==null) {
         res.status(404).json({success: false, message: "This food doesn't exist"});
-    }
-    else if ((food.id != id)&&(role!="admin")) {
-        res.status(401).json({ success: false, message: 'Access forbidden' });
     }
     else {
         deleteFoodById(req.params.id);
@@ -51,13 +43,13 @@ exports.deleteFoodById = async (req, res, id, role) => {
 }
 
 //Update a food
-exports.updateFoodById = async (req, res, id, role) => {
+exports.updateFoodById = async (req, res, role) => {
     const food = await getFoodById(req.params.id);
     if (food==null) {
         res.status(404).json({success: false, message: "This food doesn't exist"});
     }
     else if (role=="admin") {
-        const food = await updateFoodById(req.params.id, req.body.name, req.body.price);
+        const food = await updateFoodByAdmin(req.params.id, req.body.name, req.body.price, req.body.description, req.body.stock);
         if (food) {
             res.status(204).send(); 
         }
@@ -65,8 +57,8 @@ exports.updateFoodById = async (req, res, id, role) => {
             res.status(400).json({success: false, message: "Error when updating this food, verify your args"});
         }
     }
-    else if (role=="food"&&food.id==id) {
-        const food = await updateFoodById(req.params.id, req.body.name, req.body.price);
+    else if (role=="baker") {
+        const food = await updateFoodByBaker(req.params.id, req.body.name, req.body.description, req.body.stock);
         if (food) {
             res.status(204).send(); 
         }
@@ -75,6 +67,12 @@ exports.updateFoodById = async (req, res, id, role) => {
         }
     }
     else {
-        res.status(401).json({ success: false, message: 'Access forbidden' });
+        const food = await updatePrice(req.params.id, req.body.price);
+        if (food) {
+            res.status(204).send(); 
+        }
+        else {
+            res.status(400).json({success: false, message: "Error when updating this food, verify your args"});
+        }
      }
 }

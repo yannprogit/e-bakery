@@ -8,36 +8,37 @@ exports.getIngredients = async () => {
     return await db.ingredients.findAll();
 }
 
-//Add a ingredients
-exports.addIngredients = (name, price) => {
-    return db.ingredient.create({
+//Add an ingredient
+exports.addIngredient = (name, stock) => {
+    return db.ingredients.create({
         name,
-        price
+        stock
     });
 }
 
-//Return the ingredients by its id
-exports.getIngredientsById = async (id) => {
-    return await db.ingredient.findOne({
-        where: {
-            id
-        }
-    });
-}
-//Delete the food by its id
-exports.deleteIngredientsById = (id) => {
-    return db.ingredient.destroy({
+//Return the ingredient by its id
+exports.getIngredientById = async (id) => {
+    return await db.ingredients.findOne({
         where: {
             id
         }
     });
 }
 
-//Update the food by its id
-exports.updateIngredientById = async (id, name, price) => {
-    return await db.ingredient.update({
+//Delete the ingredient by its id
+exports.deleteIngredientById = (id) => {
+    return db.ingredients.destroy({
+        where: {
+            id
+        }
+    });
+}
+
+//Update the ingredient by its id
+exports.updateIngredientById = async (id, name, stock) => {
+    return await db.ingredients.update({
         name,
-        price
+        stock
     }, 
     { where: {
             id

@@ -2,7 +2,6 @@
 const axios = require('axios');
 const db = require('../models/index.js');
 const bcrypt = require('bcrypt');
-const { Sequelize } = require('sequelize');
 
 //-------------------- Functions --------------------
 exports.getExternFoods = async (req, res) => {
@@ -16,7 +15,7 @@ exports.getExternFoods = async (req, res) => {
 
 exports.populateDatabase = async (req, res) => {
     //Reset of database
-    await require('../migrations/20231222143349-reset-database').up(db.sequelize.getQueryInterface(), Sequelize);
+    await require('../migrations/20231222143349-reset-database').up();
 
     //Get extern data
     const customers = await axios.get('https://little-api.vercel.app/customers');
