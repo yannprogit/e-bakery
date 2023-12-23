@@ -1,5 +1,6 @@
 //------------- Import -------------
 const { getEmployees, getEmployeesByRole, addEmployee, deleteEmployeeById, getEmployeeById, updateEndContract } = require('../services/employeesService.js');
+const bcrypt = require('bcrypt');
 
 //------------- Methods -------------
 //Get the list of employees
@@ -29,12 +30,17 @@ exports.getEmployeeById = async (req, res, id, role) => {
 }
 
 //Add an employee
-exports.addEmployee = async (req, res) => {
-    const employee = await addEmployee(req.body.firstname, req.body.lastname, req.body.mail, await bcrypt.hash(req.body.password, 10), req.body.role);
-    if (employee) {
-        res.status(201).json({success: true, data: employee});
-    } else {
-        res.status(400).json({success: false, message: "Error when creating this employee, verify your args"});
+exports.addEmployee = async (req, res, role) => {
+    if ((role=="manager")&&(req.body.role==1)) {
+        res.status(422).json({success: false, message: "You cannot create an admin account"});
+    }
+    else {
+        const employee = await addEmployee(req.body.firstname, req.body.lastname, req.body.mail, await bcrypt.hash(req.body.password, 10), req.body.role);
+        if (employee) {
+            res.status(201).json({success: true, data: employee});
+        } else {
+            res.status(400).json({success: false, message: "Error when creating this employee, verify your args"});
+        }
     }
  }
 

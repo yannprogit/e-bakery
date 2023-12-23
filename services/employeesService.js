@@ -40,7 +40,7 @@ exports.getEmployeeById = async (id) => {
 
 //Add a employee
 exports.addEmployee = (firstname, lastname, mail, password, role) => {
-    return db.customers.create({
+    return db.employees.create({
         firstname,
         lastname,
         mail,

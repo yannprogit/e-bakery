@@ -29,7 +29,7 @@ router.get('/:id', authMiddleware(['admin', 'manager', 'deliveryman', 'cashier',
 });
 
 router.post('/', authMiddleware(['admin', 'manager']), (req, res) => {
-    employeesController.addEmployee(req, res);
+    employeesController.addEmployee(req, res, req.user.role);
 });
 
 router.delete('/:id', authMiddleware(['admin', 'manager']), (req, res) => {
