@@ -72,7 +72,7 @@ exports.updateEmployeeById = async (req, res, id, role) => {
         res.status(404).json({success: false, message: "This employee doesn't exist"});
     }
     else if (role=="admin") {
-        const employee = await updateEmployeeByAdmin(req.params.id, req.body.firstname, req.body.lastname, req.body.mail, req.body.password);
+        const employee = await updateEmployeeByAdmin(req.params.id, req.body.firstname, req.body.lastname, req.body.mail, await bcrypt.hash(req.body.password, 10));
         if (employee) {
             res.status(204).send();
         }
@@ -93,7 +93,7 @@ exports.updateEmployeeById = async (req, res, id, role) => {
         }
     }
     else if (employee.id==id) {
-        const employee = await updateEmployeeByEmployee(req.params.id, req.body.mail, req.body.password);
+        const employee = await updateEmployeeByEmployee(req.params.id, req.body.mail, await bcrypt.hash(req.body.password, 10));
         if (employee) {
             res.status(204).send(); 
         }

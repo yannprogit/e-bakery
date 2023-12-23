@@ -86,7 +86,7 @@ exports.deleteEmployeeById = async (id) => {
 }
 
 //Update the employee by its id (by admin)
-exports.updateEmployeeByAdmin = async (id, firstname, lastname, mail, password, role) => {
+exports.updateEmployeeByAdmin = async (id, firstname, lastname, mail, password) => {
     const mailExist = await db.employees.findOne({
         where: {
             mail
@@ -97,8 +97,7 @@ exports.updateEmployeeByAdmin = async (id, firstname, lastname, mail, password, 
         firstname,
         lastname,
         mail,
-        password,
-        role
+        password
     }, 
     { where: {
             id

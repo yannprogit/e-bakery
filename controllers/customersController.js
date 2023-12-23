@@ -60,7 +60,7 @@ exports.updateCustomerById = async (req, res, id, role) => {
         res.status(404).json({success: false, message: "This customer doesn't exist"});
     }
     else if (role=="admin") {
-        const customer = await updateCustomerByAdmin(req.params.id, req.body.firstname, req.body.lastname, req.body.mail, req.body.password, req.body.zipCode, req.body.address, req.body.town);
+        const customer = await updateCustomerByAdmin(req.params.id, req.body.firstname, req.body.lastname, req.body.mail, await bcrypt.hash(req.body.password, 10), req.body.zipCode, req.body.address, req.body.town);
         if (customer) {
             res.status(204).send();
         }
@@ -69,7 +69,7 @@ exports.updateCustomerById = async (req, res, id, role) => {
         }
     }
     else if (role=="customer"&&customer.id==id) {
-        const customer = await updateCustomerByCustomer(req.params.id, req.body.mail, req.body.password, req.body.zipCode, req.body.address, req.body.town);
+        const customer = await updateCustomerByCustomer(req.params.id, req.body.mail, await bcrypt.hash(req.body.password, 10), req.body.zipCode, req.body.address, req.body.town);
         if (customer) {
             res.status(204).send(); 
         }
