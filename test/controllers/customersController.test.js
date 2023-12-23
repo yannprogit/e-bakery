@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // Import required modules and the controller (functions)
 const { getCustomers,addCustomer, getCustomerById, updateCustomerById, updateCustomerByAdmin, updateCustomerByCustomer, deleteCustomerById} = require('../../controllers/customersController');
 const { getCustomerById: getCustomerByIdService, addCustomer: addCustomerService , getCustomers: getCustomersService, updateCustomerById: updateCustomerByIdService, updateCustomerByAdmin: updateCustomerByAdminService, updateCustomerByCustomer: updateCustomerByCustomerService, deleteCustomerById: deleteCustomerByIdService} = require('../../services/customersService');
@@ -449,3 +450,8 @@ describe('Customers Controller', () => {
         });
     });   
 });
+=======
+//Import
+
+//Tests
+>>>>>>> 5c133cc6e6def474b354795cc9fb49a5f4744ed1

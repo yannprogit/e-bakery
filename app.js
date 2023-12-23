@@ -1,12 +1,13 @@
-//Import
+//------------------------ Import ------------------------
 const express = require('express');
 //For yaml
 const OpenApiValidator = require('express-openapi-validator');
 
-//App
+//------------------------ App ------------------------
 const app = express();
 app.use(express.json());
 
+<<<<<<< HEAD
 //To use yaml
 app.use(
     OpenApiValidator.middleware({
@@ -14,6 +15,10 @@ app.use(
         ignoreUndocumented:true
     })
   )
+=======
+const axiosRouter = require('./routers/axiosRouter.js');
+app.use('/populate-db', axiosRouter);
+>>>>>>> 5c133cc6e6def474b354795cc9fb49a5f4744ed1
 
   app.use((req,res, next)=> {
     const name = 'Middleware A';

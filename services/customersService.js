@@ -9,13 +9,27 @@ exports.getCustomers = async () => {
 }
 
 //Add a customer
-exports.addCustomer = (firstname, lastname, mail, password) => {
-    return db.customers.create({
-        firstname,
-        lastname,
-        mail,
-        password
+exports.addCustomer = async (firstname, lastname, mail, password, zipCode, address, town) => {
+    const mailExist = await db.customers.findOne({
+        where: {
+            mail
+        }
     });
+    if (!mailExist) {
+        return db.customers.create({
+            firstname,
+            lastname,
+            mail,
+            password,
+            zipCode,
+            address,
+            town
+        });
+    }
+    else {
+        return false;
+    }
+
 }
 
 //Return the customer by its id
@@ -28,33 +42,77 @@ exports.getCustomerById = async (id) => {
 }
 
 //Delete the customer by its id
-exports.deleteCustomerById = (id) => {
-    return db.customers.destroy({
+exports.deleteCustomerById = async (id) => {
+    const deliveryInProgress = await db.buy.findOne({
         where: {
-            id
+            customerId: id,
+            validation: false,
+            status: "paid"
         }
     });
+
+    if (!deliveryInProgress) {
+        db.buy.destroy({
+            where: {
+                customerId: id,
+                status: "cart"
+            }
+        });
+
+        await db.buy.update({
+            customerId: null
+        }, 
+        { where: {
+                customerId: id
+            }
+        });
+
+        return db.customers.destroy({
+            where: {
+                id
+            }
+        });
+    }
+    else {
+        return false;
+    }
 }
 
 //Update the customer by its id
-exports.updateCustomerByAdmin = async (id, firstname, lastname, mail, password) => {
+exports.updateCustomerByAdmin = async (id, firstname, lastname, mail, password, zipCode, address, town) => {
+    const mailExist = await db.customers.findOne({
+        where: {
+            mail
+        }
+    });
+    if (!mailExist) {
     return await db.customers.update({
         firstname,
         lastname,
         mail,
-        password
+        password,
+        zipCode,
+        address,
+        town
     }, 
     { where: {
             id
         }
     });
+    }
+    else {
+        return false;
+    }
 }
 
 //Update the customer by its id (if is the customer who update his account)
-exports.updateCustomerByCustomer = async (id, mail, password) => {
+exports.updateCustomerByCustomer = async (id, mail, password, zipCode, address, town) => {
     return await db.customers.update({
         mail,
-        password
+        password,
+        zipCode,
+        address,
+        town
     }, 
     { where: {
             id

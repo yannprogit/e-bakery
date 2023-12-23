@@ -9,11 +9,9 @@ module.exports = (sequelize) => {
     },
     dueDate: {
       type: DataTypes.DATE,
-      allowNull: false,
     },
     customerId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
     },
     foodId: {
       type: DataTypes.INTEGER,
@@ -21,10 +19,23 @@ module.exports = (sequelize) => {
     },
     deliverymanId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
     },
     deliveryDate: {
       type: DataTypes.DATE,
+    },
+    status: {
+      type: DataTypes.ENUM('cart', 'paid'),
+      allowNull: false,
+      defaultValue: 'cart',
+    },
+    validation: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    qty: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
   }, {
     tableName: 'buy',

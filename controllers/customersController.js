@@ -11,7 +11,7 @@ exports.getCustomers = async (req, res) => {
 
 //Add a customer
 exports.addCustomer = async (req, res) => {
-    const customer = await addCustomer(req.body.firstname, req.body.lastname, req.body.mail, await bcrypt.hash(req.body.password, 10));
+    const customer = await addCustomer(req.body.firstname, req.body.lastname, req.body.mail, await bcrypt.hash(req.body.password, 10), req.body.zipCode, req.body.address, req.body.town);
     if (customer) {
         res.status(201).json({success: true, customer: customer});
     } else {
@@ -26,7 +26,7 @@ exports.getCustomerById = async (req, res, id, role) => {
         res.status(404).json({success: false, message: "This customer doesn't exist"});
     }
     else if ((customer.id != id)&&(role!="admin")) {
-        res.status(401).json({ success: false, message: 'Access forbidden' });
+        res.status(401).json({ success: false, message: 'Access forbidden: You cannot view an account that does not belong to you' });
     }
     else {
         res.status(200).json({success: true, data: customer});
@@ -40,11 +40,16 @@ exports.deleteCustomerById = async (req, res, id, role) => {
         res.status(404).json({success: false, message: "This customer doesn't exist"});
     }
     else if ((customer.id != id)&&(role!="admin")) {
-        res.status(401).json({ success: false, message: 'Access forbidden' });
+        res.status(401).json({ success: false, message: 'Access forbidden: You cannot delete an account that does not belong to you' });
     }
     else {
-        deleteCustomerById(req.params.id);
-        res.status(204).send();
+        const deletedCustomer = await deleteCustomerById(req.params.id);
+        if (deletedCustomer) {
+            res.status(204).send();
+        }
+        else {
+            res.status(422).json({success: false, message: "It would appear that you still have deliveries in progress"});
+        }
      }
 }
 
@@ -55,16 +60,16 @@ exports.updateCustomerById = async (req, res, id, role) => {
         res.status(404).json({success: false, message: "This customer doesn't exist"});
     }
     else if (role=="admin") {
-        const customer = await updateCustomerByAdmin(req.params.id, req.body.firstname, req.body.lastname, req.body.mail, req.body.password);
+        const customer = await updateCustomerByAdmin(req.params.id, req.body.firstname, req.body.lastname, req.body.mail, await bcrypt.hash(req.body.password, 10), req.body.zipCode, req.body.address, req.body.town);
         if (customer) {
-            res.status(204).send(); 
+            res.status(204).send();
         }
         else {
             res.status(400).json({success: false, message: "Error when updating this customer, verify your args"});
         }
     }
     else if (role=="customer"&&customer.id==id) {
-        const customer = await updateCustomerByCustomer(req.params.id, req.body.mail, req.body.password);
+        const customer = await updateCustomerByCustomer(req.params.id, req.body.mail, await bcrypt.hash(req.body.password, 10), req.body.zipCode, req.body.address, req.body.town);
         if (customer) {
             res.status(204).send(); 
         }
@@ -73,6 +78,6 @@ exports.updateCustomerById = async (req, res, id, role) => {
         }
     }
     else {
-        res.status(401).json({ success: false, message: 'Access forbidden' });
+        res.status(401).json({ success: false, message: 'Access forbidden: You cannot modify an account that does not belong to you' });
      }
 }

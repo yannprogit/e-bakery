@@ -28,6 +28,9 @@ module.exports = (sequelize) => {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    endContract: {
+      type: DataTypes.DATE,
+    },
   });
     
     return employee;
