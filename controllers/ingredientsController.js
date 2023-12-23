@@ -50,8 +50,11 @@ exports.updateIngredientById = async (req, res) => {
         res.status(404).json({success: false, message: "This ingredient doesn't exist"});
     }
     else {
-        const ingredientUpdated = await updateIngredientById(req.params.id, req.body.name, req.body.stock);
-        if (ingredientUpdated) {
+        const ingredientUpdated = await updateIngredientById(req.params.id, req.body.name, req.body.addStock);
+        if (food=="negStock") {
+            res.status(400).json({success: false, message: "You must enter a positive stock"});
+        }
+        else if (ingredientUpdated) {
             res.status(204).send(); 
         }
         else {

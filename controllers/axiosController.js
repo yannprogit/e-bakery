@@ -4,15 +4,6 @@ const db = require('../models/index.js');
 const bcrypt = require('bcrypt');
 
 //-------------------- Functions --------------------
-exports.getExternFoods = async (req, res) => {
-    const result = await axios.get('https://little-api.vercel.app/foods');
-    if (result && result.data) {
-        res.json(result.data);
-    } else {
-        res.status(400).json({success: false, message: 'Cannot get foods result'});
-    }
-}
-
 exports.populateDatabase = async (req, res) => {
     //Reset of database
     await require('../migrations/20231222143349-reset-database').up();

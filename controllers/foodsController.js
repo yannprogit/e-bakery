@@ -37,8 +37,13 @@ exports.deleteFoodById = async (req, res) => {
         res.status(404).json({success: false, message: "This food doesn't exist"});
     }
     else {
-        deleteFoodById(req.params.id);
-        res.status(204).send();
+        const deletedFood = deleteFoodById(req.params.id);
+        if (deletedFood) {
+            res.status(204).send();
+        }
+        else {
+            res.status(422).json({success: false, message: "This food is still being delivered"});
+        }
      }
 }
 
@@ -49,8 +54,14 @@ exports.updateFoodById = async (req, res, role) => {
         res.status(404).json({success: false, message: "This food doesn't exist"});
     }
     else if (role=="admin") {
-        const food = await updateFoodByAdmin(req.params.id, req.body.name, req.body.price, req.body.description, req.body.stock);
-        if (food) {
+        const food = await updateFoodByAdmin(req.params.id, req.body.name, req.body.price, req.body.description, req.body.addStock);
+        if (food=="negStock") {
+            res.status(400).json({success: false, message: "You must enter a positive stock"});
+        }
+        else if (food=="noIngredients") {
+            res.status(422).json({success: false, message: "There aren't enough ingredients left to increase the stock of this food"});
+        }
+        else if (food) {
             res.status(204).send(); 
         }
         else {
@@ -58,8 +69,14 @@ exports.updateFoodById = async (req, res, role) => {
         }
     }
     else if (role=="baker") {
-        const food = await updateFoodByBaker(req.params.id, req.body.name, req.body.description, req.body.stock);
-        if (food) {
+        const food = await updateFoodByBaker(req.params.id, req.body.name, req.body.description, req.body.addStock);
+        if (food=="negStock") {
+            res.status(400).json({success: false, message: "You must enter a positive stock"});
+        }
+        else if (food=="noIngredients") {
+            res.status(422).json({success: false, message: "There aren't enough ingredients left to increase the stock of this food"});
+        }
+        else if (food) {
             res.status(204).send(); 
         }
         else {

@@ -51,7 +51,11 @@ exports.updateDeliveryDate = async (id) => {
 
 //Update the status for a buy by its id
 exports.updateStatus = async (id, hour) => {
-    //add here a verification of stock
+    const buy = await db.buy.findOne({
+        where: {
+            id
+        }
+    });
     
     //Assign date of delivery
     let dueDate = new Date();
@@ -60,12 +64,6 @@ exports.updateStatus = async (id, hour) => {
     dueDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
     //Assign deliveryman
-    const buy = await db.buy.findOne({
-        where: {
-            id
-        }
-    });
-
     const deliverymen = await db.employees.findAll({
         where: {
             role: 2,
@@ -103,12 +101,34 @@ exports.updateStatus = async (id, hour) => {
             const availableDeliverymenIds = deliverymenIds.filter(deliverymanId => !busyDeliverymenIds.includes(deliverymanId));
 
             if (availableDeliverymenIds.length == 0) {
-                return false;
+                return "noDeliverymen";
             }
 
             const randomIndex = Math.floor(Math.random() * availableDeliverymenIds.length);
             selectedDeliverymanId = availableDeliverymenIds[randomIndex];
         }
+
+        //Check the food stock
+        const food = await db.foods.findOne({
+            where: {
+                id: buy.foodId
+            }
+        });
+
+        const newStock = food.stock - buy.qty;
+
+        if (newStock < 0) {
+            return "noFoods";
+        }
+
+        //Update the food stock
+        await db.foods.update({
+            stock: newStock
+        }, 
+        { where: {
+                id: buy.foodId
+            }
+        });
 
         //Update the buy
         return await db.buy.update({

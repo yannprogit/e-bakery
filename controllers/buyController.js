@@ -91,7 +91,10 @@ exports.updateBuyById = async (req, res, id, role) => {
                 }
                 else {
                     const statusUpdated = await updateStatus(req.params.id, hour);
-                    if (!statusUpdated) {
+                    if (statusUpdated=="noFoods") {
+                        res.status(422).json({success: false, message: "No more food in stock" });
+                    }
+                    else if (statusUpdated=="noDeliverymen") {
                         res.status(422).json({success: false, message: "No deliverymen available, please change delivery hour or order later" });
                     }
                     else {
