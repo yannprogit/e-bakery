@@ -1,5 +1,5 @@
 //------------- Import -------------
-const { getEmployees, getEmployeesByRole, addEmployee, deleteEmployeeById, getEmployeeById, updateEndContract } = require('../services/employeesService.js');
+const { getEmployees, getEmployeesByRole, addEmployee, deleteEmployeeById, updateEmployeeByEmployee, updateEmployeeByAdmin, updateEndContract } = require('../services/employeesService.js');
 const bcrypt = require('bcrypt');
 
 //------------- Methods -------------
