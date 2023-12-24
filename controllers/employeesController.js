@@ -22,7 +22,7 @@ exports.getEmployeeById = async (req, res, id, role) => {
         res.status(404).json({success: false, message: "This employee doesn't exist"});
     }
     else if ((employee.id != id && role != "admin" && !(role == "manager" && employee.id == id)) || (role == "manager" && [1, 5].includes(employee.role)))  {
-        res.status(401).json({ success: false, message: 'Access forbidden: You cannot view an account that does not belong to you' });
+        res.status(403).json({ success: false, message: 'Access forbidden: You cannot view an account that does not belong to you' });
     }
     else {
         res.status(200).json({success: true, data: employee});
@@ -39,7 +39,7 @@ exports.addEmployee = async (req, res, role) => {
         if (employee) {
             res.status(201).json({success: true, data: employee});
         } else {
-            res.status(400).json({success: false, message: "Error when creating this employee, verify your args"});
+            res.status(422).json({success: false, message: "This mail is already linked on an account"});
         }
     }
  }
@@ -52,7 +52,7 @@ exports.deleteEmployeeById = async (req, res, id, role) => {
     }
     else if (role == "manager" && [1, 5].includes(employee.role)) 
     {
-        res.status(401).json({ success: false, message: "Access forbidden: You cannot delete another manager's account or admin's account" });
+        res.status(403).json({ success: false, message: "Access forbidden: You cannot delete another manager's account or admin's account" });
     }
     else {
         const deletedEmployee = await deleteEmployeeById(req.params.id);
@@ -77,15 +77,12 @@ exports.updateEmployeeById = async (req, res, id, role) => {
             res.status(204).send();
         }
         else {
-            res.status(400).json({success: false, message: "Error when updating this employee, verify your args"});
+            res.status(422).json({success: false, message: "This mail is already linked on an account"});
         }
     }
     else if (role=="manager") {
         const employee = await updateEndContract(req.params.id, req.body.endContract);
         if (!employee) {
-            res.status(400).json({success: false, message: "Error when updating this employee, you must enter a valid date"});
-        }
-        else if (employee == "deliveriesInProgress") {
             res.status(422).json({success: false, message: "Deliveries are scheduled after the new contract end date"});
         }
         else {
@@ -98,10 +95,10 @@ exports.updateEmployeeById = async (req, res, id, role) => {
             res.status(204).send(); 
         }
         else {
-            res.status(400).json({success: false, message: "Error when updating this employee, verify your args"});
+            res.status(422).json({success: false, message: "This mail is already linked on an account"});
         }
     }
     else {
-        res.status(401).json({ success: false, message: 'Access forbidden: You cannot modify an account that does not belong to you' });
+        res.status(403).json({ success: false, message: 'Access forbidden: You cannot modify an account that does not belong to you' });
      }
 }

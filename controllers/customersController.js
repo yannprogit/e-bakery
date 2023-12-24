@@ -26,7 +26,7 @@ exports.getCustomerById = async (req, res, id, role) => {
         res.status(404).json({success: false, message: "This customer doesn't exist"});
     }
     else if ((customer.id != id)&&(role!="admin")) {
-        res.status(401).json({ success: false, message: 'Access forbidden: You cannot view an account that does not belong to you' });
+        res.status(403).json({ success: false, message: 'Access forbidden: You cannot view an account that does not belong to you' });
     }
     else {
         res.status(200).json({success: true, data: customer});
@@ -40,7 +40,7 @@ exports.deleteCustomerById = async (req, res, id, role) => {
         res.status(404).json({success: false, message: "This customer doesn't exist"});
     }
     else if ((customer.id != id)&&(role!="admin")) {
-        res.status(401).json({ success: false, message: 'Access forbidden: You cannot delete an account that does not belong to you' });
+        res.status(403).json({ success: false, message: 'Access forbidden: You cannot delete an account that does not belong to you' });
     }
     else {
         const deletedCustomer = await deleteCustomerById(req.params.id);
@@ -78,6 +78,6 @@ exports.updateCustomerById = async (req, res, id, role) => {
         }
     }
     else {
-        res.status(401).json({ success: false, message: 'Access forbidden: You cannot modify an account that does not belong to you' });
+        res.status(403).json({ success: false, message: 'Access forbidden: You cannot modify an account that does not belong to you' });
      }
 }
