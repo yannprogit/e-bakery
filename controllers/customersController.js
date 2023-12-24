@@ -15,7 +15,7 @@ exports.addCustomer = async (req, res) => {
     if (customer) {
         res.status(201).json({success: true, customer: customer});
     } else {
-        res.status(400).json({success: false, message: "Error when creating this customer, verify your args"});
+        res.status(422).json({success: false, message: "This mail is already linked on an account"});
     }
  }
 
@@ -65,7 +65,7 @@ exports.updateCustomerById = async (req, res, id, role) => {
             res.status(204).send();
         }
         else {
-            res.status(400).json({success: false, message: "Error when updating this customer, verify your args"});
+            res.status(422).json({success: false, message: "This mail is already linked on an account"});
         }
     }
     else if (role=="customer"&&customer.id==id) {
@@ -74,7 +74,7 @@ exports.updateCustomerById = async (req, res, id, role) => {
             res.status(204).send(); 
         }
         else {
-            res.status(400).json({success: false, message: "Error when updating this customer, verify your args"});
+            res.status(422).json({success: false, message: "This mail is already linked on an account"});
         }
     }
     else {
