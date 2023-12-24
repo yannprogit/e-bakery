@@ -11,6 +11,9 @@ exports.getFoods = async () => {
 
 //Add a food
 exports.addFood = (name, price, description, stock) => {
+    if (stock<0) {
+        return false;
+    }
     return db.foods.create({
         name,
         price,
@@ -100,7 +103,7 @@ exports.updateFoodByAdmin = async (id, name, price, description, addStock) => {
 
         const ingredientStocks = ingredients.map(ingredient => ingredient.stock - addStock);
         if (ingredientStocks.some(stock => stock < 0)) {
-            return "noIngredients";
+            return false;
         }
         else {
             for (let i = 0; i < ingredients.length; i++) {

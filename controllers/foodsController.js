@@ -15,7 +15,7 @@ exports.addFood = async (req, res) => {
         res.status(201).json({success: true, food: food});
     } 
     else {
-        res.status(404).json({success: false, message: "Error when creating this food, verify your args"});
+        res.status(400).json({success: false, message: "The stock must be over 0"});
     }
  }
 
@@ -56,40 +56,29 @@ exports.updateFoodById = async (req, res, role) => {
     else if (role=="admin") {
         const food = await updateFoodByAdmin(req.params.id, req.body.name, req.body.price, req.body.description, req.body.addStock);
         if (food=="negStock") {
-            res.status(400).json({success: false, message: "You must enter a positive stock"});
+            res.status(400).json({success: false, message: "The addition of stock must be over 0"});
         }
-        else if (food=="noIngredients") {
+        else if (!food) {
             res.status(422).json({success: false, message: "There aren't enough ingredients left to increase the stock of this food"});
         }
-        else if (food) {
-            res.status(204).send(); 
-        }
         else {
-            res.status(400).json({success: false, message: "Error when updating this food, verify your args"});
+            res.status(204).send(); 
         }
     }
     else if (role=="baker") {
         const food = await updateFoodByBaker(req.params.id, req.body.name, req.body.description, req.body.addStock);
         if (food=="negStock") {
-            res.status(400).json({success: false, message: "You must enter a positive stock"});
+            res.status(400).json({success: false, message: "The addition of stock must be over 0"});
         }
-        else if (food=="noIngredients") {
+        else if (!food) {
             res.status(422).json({success: false, message: "There aren't enough ingredients left to increase the stock of this food"});
         }
-        else if (food) {
-            res.status(204).send(); 
-        }
         else {
-            res.status(400).json({success: false, message: "Error when updating this food, verify your args"});
+            res.status(204).send(); 
         }
     }
     else {
-        const food = await updatePrice(req.params.id, req.body.price);
-        if (food) {
-            res.status(204).send(); 
-        }
-        else {
-            res.status(400).json({success: false, message: "Error when updating this food, verify your args"});
-        }
+        await updatePrice(req.params.id, req.body.price);
+        res.status(204).send(); 
      }
 }

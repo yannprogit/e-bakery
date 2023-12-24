@@ -16,7 +16,7 @@ exports.addIngredient = async (req, res) => {
         res.status(201).json({success: true, ingredient: ingredient});
     } 
     else {
-        res.status(404).json({success: false, message: "Error when creating this ingredient, verify your args"});
+        res.status(400).json({success: false, message: "The stock must be over 0"});
     }
  }
 
@@ -51,14 +51,11 @@ exports.updateIngredientById = async (req, res) => {
     }
     else {
         const ingredientUpdated = await updateIngredientById(req.params.id, req.body.name, req.body.addStock);
-        if (food=="negStock") {
-            res.status(400).json({success: false, message: "You must enter a positive stock"});
-        }
-        else if (ingredientUpdated) {
-            res.status(204).send(); 
+        if (!ingredientUpdated) {
+            res.status(400).json({success: false, message: "The addition of stock must be over 0"});
         }
         else {
-            res.status(400).json({success: false, message: "Error when updating this ingredient, verify your args"});
+            res.status(204).send(); 
         }
-     }
+    }
 }

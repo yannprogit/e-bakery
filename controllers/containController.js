@@ -16,13 +16,8 @@ exports.addContain = async (req, res) => {
         res.status(422).json({success: false, message: "This contain already exist"});
     }
     else {
-        const contain = await addContain(req.body.foodId, req.body.ingredientId);
-        if (contain) {
-            res.status(201).json({success: true, contain: contain});
-        } 
-        else {
-            res.status(404).json({success: false, message: "Error when creating this contain, verify your args"});
-        }
+        await addContain(req.body.foodId, req.body.ingredientId);
+        res.status(201).json({success: true, contain: contain});
     }
  }
 
@@ -65,13 +60,8 @@ exports.replaceIngredientOfFood = async (req, res) => {
             res.status(422).json({success: false, message: "This contain already exist"});
         }
         else {
-            const containUpdated = await replaceIngredientOfFood(req.params.id, req.body.ingredientId, req.body.newIngredientId);
-            if (containUpdated) {
-                res.status(204).send(); 
-            }
-            else {
-                res.status(400).json({success: false, message: "Error when updating this ingredient, verify your args"});
-            }
+            await replaceIngredientOfFood(req.params.id, req.body.ingredientId, req.body.newIngredientId);
+            res.status(204).send(); 
         }
     }
 }
