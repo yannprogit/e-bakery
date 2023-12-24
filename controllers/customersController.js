@@ -71,7 +71,7 @@ exports.updateCustomerById = async (req, res, id, role) => {
     else if (role=="customer"&&customer.id==id) {
         const customer = await updateCustomerByCustomer(req.params.id, req.body.mail, await bcrypt.hash(req.body.password, 10), req.body.zipCode, req.body.address, req.body.town);
         if (customer) {
-            res.status(204).send(); 
+            res.status(204).send();
         }
         else {
             res.status(422).json({success: false, message: "This mail is already linked on an account"});

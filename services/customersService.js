@@ -80,11 +80,20 @@ exports.deleteCustomerById = async (id) => {
 
 //Update the customer by its id
 exports.updateCustomerByAdmin = async (id, firstname, lastname, mail, password, zipCode, address, town) => {
-    const mailExist = await db.customers.findOne({
+    const customer = await db.customers.findOne({
         where: {
-            mail
+            id
         }
     });
+    
+    let mailExist = false;
+    if (mail!=customer.mail) {
+        mailExist = await db.customers.findOne({
+            where: {
+                mail
+            }
+        });        
+    }
     if (!mailExist) {
     return await db.customers.update({
         firstname,
@@ -107,11 +116,21 @@ exports.updateCustomerByAdmin = async (id, firstname, lastname, mail, password, 
 
 //Update the customer by its id (if is the customer who update his account)
 exports.updateCustomerByCustomer = async (id, mail, password, zipCode, address, town) => {
-    const mailExist = await db.customers.findOne({
+    const customer = await db.customers.findOne({
         where: {
-            mail
+            id
         }
     });
+
+    let mailExist = false;
+    if (mail!=customer.mail) {
+        mailExist = await db.customers.findOne({
+            where: {
+                mail
+            }
+        });        
+    }
+
     if (!mailExist) {
         return await db.customers.update({
             mail,

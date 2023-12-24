@@ -94,11 +94,20 @@ exports.deleteEmployeeById = async (id) => {
 
 //Update the employee by its id (by admin)
 exports.updateEmployeeByAdmin = async (id, firstname, lastname, mail, password) => {
-    const mailExist = await db.employees.findOne({
+    const employee = await db.employees.findOne({
         where: {
-            mail
+            id
         }
     });
+    
+    let mailExist = false;
+    if (mail!=employee.mail) {
+        mailExist = await db.employees.findOne({
+            where: {
+                mail
+            }
+        });        
+    }
     if (!mailExist) {
     return await db.employees.update({
         firstname,
@@ -118,11 +127,20 @@ exports.updateEmployeeByAdmin = async (id, firstname, lastname, mail, password) 
 
 //Update the employee by its id (if is the employee who update his account)
 exports.updateEmployeeByEmployee = async (id, mail, password) => {
-    const mailExist = await db.employees.findOne({
+    const employee = await db.employees.findOne({
         where: {
-            mail
+            id
         }
     });
+    
+    let mailExist = false;
+    if (mail!=employee.mail) {
+        mailExist = await db.employees.findOne({
+            where: {
+                mail
+            }
+        });        
+    }
     if (!mailExist) {
         return await db.employees.update({
             mail,
