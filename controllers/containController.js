@@ -26,8 +26,8 @@ exports.deleteContain = async (req, res) => {
     const ingredientId = req.query.ingredientId;
     if (!ingredientId) {
         const compositions = await getSpecificCompositions(req.params.foodId, "food");
-        if (compositions==null) {
-            res.status(404).json({success: false, message: "This food have not compositions"});
+        if (!compositions) {
+            res.status(404).json({success: false, message: "This food has no compositions"});
         }
         else {
             deleteCompositionsOfFood(req.params.foodId);
