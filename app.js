@@ -26,8 +26,8 @@ app.use('/purchases', buyRouter);
 const containRouter = require('./routers/containRouter.js');
 app.use('/compositions', containRouter);
 
-const loginRouter = require('./routers/loginRouter.js')
-app.use('/login', loginRouter)
+const loginRouter = require('./routers/loginRouter.js');
+app.use('/login', loginRouter);
 
 //Export
 module.exports = app;
