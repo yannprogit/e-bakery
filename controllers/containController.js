@@ -1,12 +1,12 @@
 //------------- Import -------------
-const { getCompositions, addContain, getSpecificCompositions, replaceIngredientOfFood, deleteContain, getContainByIds } = require('../services/containService.js');
+const { getCompositions, addContain, getSpecificCompositions, replaceIngredientOfFood, deleteIngredientOfFood, deleteCompositionsOfFood, getContainByIds } = require('../services/containService.js');
 const { getFoodById } = require('../services/foodsService.js');
 
 //------------- Methods -------------
 //Get the list of compositions
 exports.getCompositions = async (req, res) => {
     const contain = await getCompositions();
-    res.json({success: true, data: contain});
+    res.status(200).json({success: true, data: contain});
 }
 
 //Add a contain
@@ -21,16 +21,29 @@ exports.addContain = async (req, res) => {
     }
  }
 
-//Delete a contain
+//Delete compositions or an ingredient of a food
 exports.deleteContain = async (req, res) => {
-    const contain = await getContainByIds(req.body.foodId, req.body.ingredientId);
-    if (contain==null) {
-        res.status(404).json({success: false, message: "This contain doesn't exist"});
+    const ingredientId = req.query.ingredientId;
+    if (!ingredientId) {
+        const compositions = await getSpecificCompositions(req.params.foodId, "food");
+        if (compositions==null) {
+            res.status(404).json({success: false, message: "This food have not compositions"});
+        }
+        else {
+            deleteCompositionsOfFood(req.params.foodId);
+            res.status(204).send();
+         }
     }
     else {
-        deleteContain(req.body.foodId, req.body.ingredientId);
-        res.status(204).send();
-     }
+        const existContain = await getContainByIds(req.params.foodId, ingredientId);
+        if (!existContain) {
+            res.status(404).json({success: false, message: "This contain doesn't exist"});
+        }
+        else {
+            deleteIngredientOfFood(req.params.foodId, ingredientId);
+            res.status(204).send();
+         }
+    }
 }
 
 //Get compositions according to their ids and type (food or ingredient)
@@ -45,13 +58,13 @@ exports.getSpecificCompositions = async (req, res) => {
 }
 
 exports.replaceIngredientOfFood = async (req, res) => {
-    const food = await getFoodById(req.params.id);
+    const food = await getFoodById(req.params.foodId);
     if (food==null) {
         res.status(404).json({success: false, message: "This food doesn't exist"});
     }
     else {
-        const contain = await getContainByIds(req.params.id, req.body.ingredientId);
-        const existContain = await getContainByIds(req.params.id, req.body.newIngredientId);
+        const contain = await getContainByIds(req.params.foodId, req.body.ingredientId);
+        const existContain = await getContainByIds(req.params.foodId, req.body.newIngredientId);
 
         if (contain==null) {
             res.status(404).json({success: false, message: "This contain doesn't exist"});
@@ -60,7 +73,7 @@ exports.replaceIngredientOfFood = async (req, res) => {
             res.status(422).json({success: false, message: "This contain already exist"});
         }
         else {
-            await replaceIngredientOfFood(req.params.id, req.body.ingredientId, req.body.newIngredientId);
+            await replaceIngredientOfFood(req.params.foodId, req.body.ingredientId, req.body.newIngredientId);
             res.status(204).send(); 
         }
     }

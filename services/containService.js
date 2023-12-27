@@ -45,8 +45,17 @@ exports.getSpecificCompositions = async (id, type) => {
     }
 }
 
-//Delete the composition
-exports.deleteContain = (foodId, ingredientId) => {
+//Delete all compositions of food
+exports.deleteCompositionsOfFood = (foodId) => {
+    return db.contain.destroy({
+        where: {
+            foodId
+        }
+    });
+}
+
+//Delete an ingredient of food
+exports.deleteIngredientOfFood = (foodId, ingredientId) => {
     return db.contain.destroy({
         where: {
             foodId,

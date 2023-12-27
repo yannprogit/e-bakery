@@ -121,6 +121,9 @@ exports.updateFoodByAdmin = async (id, name, price, description, addStock) => {
             }
         }
     }
+    else {
+        return "noCompositions";
+    }
 
     let addedStock = food.stock + addStock;
     return await db.foods.update({

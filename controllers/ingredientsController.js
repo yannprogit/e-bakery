@@ -5,7 +5,7 @@ const { getIngredients, addIngredient, getIngredientById, deleteIngredientById, 
 //Get the list of ingredients 
 exports.getIngredients = async (req, res) => {
     const ingredients = await getIngredients();
-    res.json({success: true, data: ingredients});
+    res.status(200).json({success: true, data: ingredients});
 }
 
 

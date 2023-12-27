@@ -5,7 +5,7 @@ const { getFoods, addFood, getFoodById, deleteFoodById, updateFoodByAdmin, updat
 //Get the list of foods
 exports.getFoods = async (req, res) => {
     const foods = await getFoods();
-    res.json({success: true, data: foods});
+    res.status(200).json({success: true, data: foods});
 }
 
 //Add a food
@@ -57,6 +57,9 @@ exports.updateFoodById = async (req, res, role) => {
         const food = await updateFoodByAdmin(req.params.id, req.body.name, req.body.price, req.body.description, req.body.addStock);
         if (food=="negStock") {
             res.status(400).json({success: false, message: "The addition of stock must be over 0"});
+        }
+        else if (food=="noCompositions") {
+            res.status(422).json({success: false, message: "You must add compositions to this food to be able to add stocks"});
         }
         else if (!food) {
             res.status(422).json({success: false, message: "There aren't enough ingredients left to increase the stock of this food"});
