@@ -33,7 +33,7 @@ exports.login = async (req, res) => {
                 where: {mail: req.body.mail}
             });
         }
-        else if (role=="employee") {
+        else {
             user = await db.employees.findOne({
                 where: {mail: req.body.mail}
             });
@@ -46,9 +46,6 @@ exports.login = async (req, res) => {
                     return res.status(422).json({success: false, message: 'Your contract has expired, you can no longer connect'});
                 }
             } 
-        }
-        else {
-            return res.status(400).json({success: false, message: 'The role must be customer or employee'});
         }
 
         if (user) {
