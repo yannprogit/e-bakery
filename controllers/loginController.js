@@ -13,7 +13,7 @@ exports.authMiddleware = (allowedRoles) => (req, res, next) => {
 
     jwt.verify(token, process.env.secretKey, async (err, user) => {
         if (err) {
-            return res.status(403).json({ success: false, message: 'The token is invalid' });
+            return res.status(403).json({ success: false, message: 'Access forbidden: The token is invalid' });
         }
 
         req.user = user;
