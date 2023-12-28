@@ -39,14 +39,21 @@ exports.getEmployeeById = async (id) => {
 }
 
 //Add a employee
-exports.addEmployee = (firstname, lastname, mail, password, role) => {
-    return db.employees.create({
-        firstname,
-        lastname,
-        mail,
-        password,
-        role
+exports.addEmployee = async (firstname, lastname, mail, password, role) => {
+    const mailExist = await db.employees.findOne({
+        where: {
+            mail
+        }
     });
+    if (!mailExist) {
+        return db.employees.create({
+            firstname,
+            lastname,
+            mail,
+            password,
+            role
+        });
+    }
 }
 /*
 //Delete the employee by its id
@@ -134,11 +141,20 @@ exports.deleteEmployeeById = async (id) => {
 
 //Update the employee by its id (by admin)
 exports.updateEmployeeByAdmin = async (id, firstname, lastname, mail, password) => {
-    const mailExist = await db.employees.findOne({
+    const employee = await db.employees.findOne({
         where: {
-            mail
+            id
         }
     });
+    
+    let mailExist = false;
+    if (mail!=employee.mail) {
+        mailExist = await db.employees.findOne({
+            where: {
+                mail
+            }
+        });        
+    }
     if (!mailExist) {
     return await db.employees.update({
         firstname,
@@ -158,14 +174,30 @@ exports.updateEmployeeByAdmin = async (id, firstname, lastname, mail, password) 
 
 //Update the employee by its id (if is the employee who update his account)
 exports.updateEmployeeByEmployee = async (id, mail, password) => {
-    return await db.employees.update({
-        mail,
-        password
-    }, 
-    { where: {
+    const employee = await db.employees.findOne({
+        where: {
             id
         }
     });
+    
+    let mailExist = false;
+    if (mail!=employee.mail) {
+        mailExist = await db.employees.findOne({
+            where: {
+                mail
+            }
+        });        
+    }
+    if (!mailExist) {
+        return await db.employees.update({
+            mail,
+            password
+        }, 
+        { where: {
+                id
+            }
+        });
+    }
 }
 
 //Update the date of end of contract of employee by its id
@@ -181,7 +213,7 @@ exports.updateEndContract = async (id, endContract) => {
     });
 
     if (deliveryInProgress) {
-        return "deliveriesInProgress";
+        return false;
     }
 
     return await db.employees.update({

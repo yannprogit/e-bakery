@@ -27,7 +27,7 @@ exports.getBuyById = async (req, res, id, role) => {
         res.status(404).json({success: false, message: "This buy doesn't exist"});
     }
     else if ((role=="customer" && buy.customerId != id)||(role=="deliveryman" && buy.deliverymanId != id)) {
-        res.status(401).json({ success: false, message: 'Access forbidden: You cannot view an order that does not belong to you' });
+        res.status(403).json({ success: false, message: 'Access forbidden: You cannot view an order that does not belong to you' });
     }
     else {
         res.status(200).json({success: true, data: buy});
@@ -44,7 +44,7 @@ exports.deleteBuyById = async (req, res, customerId) => {
         res.status(422).json({success: false, message: "This buy cannot be delete because it has been paid" });
     }
     else if ((buy.customerId != customerId)&&(role!="admin")) {
-        res.status(401).json({ success: false, message: 'Access forbidden: You cannot delete an order that does not belong to you' });
+        res.status(403).json({ success: false, message: 'Access forbidden: You cannot delete an order that does not belong to you' });
     }
     else {
         deleteBuyById(req.params.id);
@@ -59,7 +59,7 @@ exports.updateBuyById = async (req, res, id, role) => {
         res.status(404).json({success: false, message: "This buy doesn't exist"});
     }
     else if ((role=="customer" && buy.customerId != id)||(role=="deliveryman" && buy.deliverymanId != id)) {
-        res.status(401).json({ success: false, message: 'Access forbidden: You cannot update an order that does not belong to you' });
+        res.status(403).json({ success: false, message: 'Access forbidden: You cannot update an order that does not belong to you' });
     }
     else {
         //We assign a false role to the admin depending on the progress of the order

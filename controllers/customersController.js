@@ -15,7 +15,7 @@ exports.addCustomer = async (req, res) => {
     if (customer) {
         res.status(201).json({success: true, customer: customer});
     } else {
-        res.status(400).json({success: false, message: "Error when creating this customer, verify your args"});
+        res.status(422).json({success: false, message: "This mail is already linked on an account"});
     }
  }
 
@@ -26,7 +26,7 @@ exports.getCustomerById = async (req, res, id, role) => {
         res.status(404).json({success: false, message: "This customer doesn't exist"});
     }
     else if ((customer.id != id)&&(role!="admin")) {
-        res.status(401).json({ success: false, message: 'Access forbidden: You cannot view an account that does not belong to you' });
+        res.status(403).json({ success: false, message: 'Access forbidden: You cannot view an account that does not belong to you' });
     }
     else {
         res.status(200).json({success: true, data: customer});
@@ -40,7 +40,7 @@ exports.deleteCustomerById = async (req, res, id, role) => {
         res.status(404).json({success: false, message: "This customer doesn't exist"});
     }
     else if ((customer.id != id)&&(role!="admin")) {
-        res.status(401).json({ success: false, message: 'Access forbidden: You cannot delete an account that does not belong to you' });
+        res.status(403).json({ success: false, message: 'Access forbidden: You cannot delete an account that does not belong to you' });
     }
     else {
         const deletedCustomer = await deleteCustomerById(req.params.id);
@@ -65,19 +65,19 @@ exports.updateCustomerById = async (req, res, id, role) => {
             res.status(204).send();
         }
         else {
-            res.status(400).json({success: false, message: "Error when updating this customer, verify your args"});
+            res.status(422).json({success: false, message: "This mail is already linked on an account"});
         }
     }
     else if (role=="customer"&&customer.id==id) {
         const customer = await updateCustomerByCustomer(req.params.id, req.body.mail, await bcrypt.hash(req.body.password, 10), req.body.zipCode, req.body.address, req.body.town);
         if (customer) {
-            res.status(204).send(); 
+            res.status(204).send();
         }
         else {
-            res.status(400).json({success: false, message: "Error when updating this customer, verify your args"});
+            res.status(422).json({success: false, message: "This mail is already linked on an account"});
         }
     }
     else {
-        res.status(401).json({ success: false, message: 'Access forbidden: You cannot modify an account that does not belong to you' });
+        res.status(403).json({ success: false, message: 'Access forbidden: You cannot modify an account that does not belong to you' });
      }
 }

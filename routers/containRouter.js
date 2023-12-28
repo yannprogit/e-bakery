@@ -12,11 +12,11 @@ router.post('/', authMiddleware(['admin','baker']), (req, res) => {
 
 router.get('/:type/:id', containController.getSpecificCompositions);
 
-router.delete('/', authMiddleware(['admin','baker']), (req, res) => {
+router.delete('/food/:foodId', authMiddleware(['admin','baker']), (req, res) => {
     containController.deleteContain(req, res);
 });
 
-router.put('/food/:id', authMiddleware(['admin','baker']), (req, res) => {
+router.put('/food/:foodId', authMiddleware(['admin','baker']), (req, res) => {
     containController.replaceIngredientOfFood(req, res);
 });
 

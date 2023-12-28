@@ -1,4 +1,3 @@
-//------------------------ Import ------------------------
 const express = require('express');
 //For yaml
 const OpenApiValidator = require('express-openapi-validator');
@@ -7,18 +6,8 @@ const OpenApiValidator = require('express-openapi-validator');
 const app = express();
 app.use(express.json());
 
-<<<<<<< HEAD
-//To use yaml
-app.use(
-    OpenApiValidator.middleware({
-        apiSpec: './open-api.yaml',
-        ignoreUndocumented:true
-    })
-  )
-=======
 const axiosRouter = require('./routers/axiosRouter.js');
 app.use('/populate-db', axiosRouter);
->>>>>>> 5c133cc6e6def474b354795cc9fb49a5f4744ed1
 
   app.use((req,res, next)=> {
     const name = 'Middleware A';
@@ -99,15 +88,8 @@ containRouter.use((req,res, next)=> {
 
 app.use('/compositions', containRouter);
 
-const loginRouter = require('./routers/loginRouter.js')
-// Middleware I specific to the login route
-loginRouter.use((req,res, next)=> {
-  const name = 'Middleware I for login Route'
-  console.log(name);
-  next();
-})
-
-app.use('/login', loginRouter)
+const loginRouter = require('./routers/loginRouter.js');
+app.use('/login', loginRouter);
 
 
 //Export

@@ -10,6 +10,9 @@ exports.getIngredients = async () => {
 
 //Add an ingredient
 exports.addIngredient = (name, stock) => {
+    if (stock < 0){
+        return false;
+    }
     return db.ingredients.create({
         name,
         stock
@@ -43,7 +46,7 @@ exports.deleteIngredientById = (id) => {
 //Update the ingredient by its id
 exports.updateIngredientById = async (id, name, addStock) => {
     if (addStock < 0){
-        return "negStock";
+        return false;
     }
 
     const ingredient = await db.ingredients.findOne({
