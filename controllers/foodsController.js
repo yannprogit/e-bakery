@@ -37,7 +37,7 @@ exports.deleteFoodById = async (req, res) => {
         res.status(404).json({success: false, message: "This food doesn't exist"});
     }
     else {
-        const deletedFood = deleteFoodById(req.params.id);
+        const deletedFood = await deleteFoodById(req.params.id);
         if (deletedFood) {
             res.status(204).send();
         }

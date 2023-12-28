@@ -48,7 +48,7 @@ exports.addEmployee = (firstname, lastname, mail, password, role) => {
         role
     });
 }
-
+/*
 //Delete the employee by its id
 exports.deleteEmployeeById = async (id) => {
     const employee = await db.employees.findOne({
@@ -57,7 +57,7 @@ exports.deleteEmployeeById = async (id) => {
         }
     });
 
-    if (employee.role==2) {
+    if (employee && employee.role == 2) {
         const deliveryInProgress = await db.buy.findOne({
             where: {
                 deliverymanId: id,
@@ -69,13 +69,17 @@ exports.deleteEmployeeById = async (id) => {
         if (deliveryInProgress) {
             return false;
         }
-        await db.buy.update({
-            deliverymanId: null
-        }, 
-        { where: {
-                deliverymanId: id
+
+        await db.buy.update(
+            {
+                deliverymanId: null
+            },
+            {
+                where: {
+                    deliverymanId: id
+                }
             }
-        });
+        );
     }
 
     return db.employees.destroy({
@@ -83,7 +87,50 @@ exports.deleteEmployeeById = async (id) => {
             id
         }
     });
+};
+*/
+
+// Delete the employee by its id
+exports.deleteEmployeeById = async (id) => {
+    const employee = await db.employees.findOne({
+        where: {
+            id
+        }
+    });
+
+    if (employee && employee.role === 2) {
+        const deliveryInProgress = await db.buy.findOne({
+            where: {
+                deliverymanId: id,
+                validation: false,
+                status: "paid"
+            }
+        });
+
+        if (deliveryInProgress) {
+            return false;
+        }
+
+        await db.buy.update(
+            {
+                deliverymanId: null
+            },
+            {
+                where: {
+                    deliverymanId: id
+                }
+            }
+        );
+    }
+
+    // Return a value indicating successful deletion (true) or undefined if not handled explicitly
+    return db.employees.destroy({
+        where: {
+            id
+        }
+    });
 }
+
 
 //Update the employee by its id (by admin)
 exports.updateEmployeeByAdmin = async (id, firstname, lastname, mail, password) => {

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // Import required modules and the controller (functions)
 const { getCustomers,addCustomer, getCustomerById, updateCustomerById, updateCustomerByAdmin, updateCustomerByCustomer, deleteCustomerById} = require('../../controllers/customersController');
 const { getCustomerById: getCustomerByIdService, addCustomer: addCustomerService , getCustomers: getCustomersService, updateCustomerById: updateCustomerByIdService, updateCustomerByAdmin: updateCustomerByAdminService, updateCustomerByCustomer: updateCustomerByCustomerService, deleteCustomerById: deleteCustomerByIdService} = require('../../services/customersService');
@@ -67,7 +66,7 @@ describe('Customers Controller', () => {
             /* You need to have the same message than customersController.js
                 Or it won't work because it doesn't receive the same message */
             expect(res.status).toHaveBeenCalledWith(401);
-            expect(res.json).toHaveBeenCalledWith({ success: false, message: "Access forbidden" });
+            expect(res.json).toHaveBeenCalledWith({ success: false, message: "Access forbidden: You cannot view an account that does not belong to you" });
 
             // Reset mock
             jest.clearAllMocks();
@@ -136,20 +135,26 @@ describe('Customers Controller', () => {
         it('should add a customer successfully', async () => {
             const req = {
                 body: {
-                    firstname: 'John',
-                    lastname: 'Doe',
-                    mail: 'john.doe@example.com',
+                    firstname: 'Jean',
+                    lastname: 'Quartier',
+                    mail: 'jeanquartier@example.com',
                     password: 'securepassword',
+                    zipCode: '5182',
+                    address: '5_Chevals_de_la_gallerie',
+                    town: 'Roiroi'
                 },
             };
 
             const hashedPassword = '$2a$10$SomeHashedPassword';
 
             const customer = {
-                id: 'someCustomerId',
-                firstname: 'John',
-                lastname: 'Doe',
-                mail: 'john.doe@example.com',
+                id: 'CustomerId',
+                firstname: 'Jean',
+                lastname: 'Quartier',
+                mail: 'jeanquatier@example.com',
+                zipCode: '5182',
+                address: '5_Chevals_de_la_gallerie',
+                town: 'Roiroi'
             };
 
             bcrypt.hash.mockResolvedValue(hashedPassword);
@@ -166,11 +171,15 @@ describe('Customers Controller', () => {
             // Assertions
             expect(bcrypt.hash).toHaveBeenCalledWith('securepassword', 10);
             expect(addCustomerService).toHaveBeenCalledWith(
-                'John',
-                'Doe',
-                'john.doe@example.com',
-                hashedPassword
+                'Jean',
+                'Quartier',
+                'jeanquartier@example.com',
+                hashedPassword,
+                '5182',
+                '5_Chevals_de_la_gallerie',
+                'Roiroi'
             );
+
             expect(res.status).toHaveBeenCalledWith(201);
             expect(res.json).toHaveBeenCalledWith({
                 success: true,
@@ -185,13 +194,18 @@ describe('Customers Controller', () => {
         it('should return 400 if customer creation fails', async () => {
           const req = {
             body: {
-              firstname: 'John',
-              lastname: 'Doe',
-              mail: 'john.doe@example.com',
-              password: 'password123',
+                firstname: 'Jean',
+                lastname: 'Quartier',
+                mail: 'jeanquartier@example.com',
+                password: 'securepassword',
+                zipCode: '5182',
+                address: '5_Chevals_de_la_gallerie',
+                town: 'Roiroi'
             },
           };
-    
+
+          const hashedPassword = '$2a$10$SomeHashedPassword';
+
           const res = {
             status: jest.fn().mockReturnThis(),
             json: jest.fn(),
@@ -202,10 +216,13 @@ describe('Customers Controller', () => {
           await addCustomer(req, res);
     
           expect(addCustomerService).toHaveBeenCalledWith(
-            'John',
-            'Doe',
-            'john.doe@example.com',
-            expect.any(String)
+            'Jean',
+            'Quartier',
+            'jeanquartier@example.com',
+            hashedPassword,
+            '5182',
+            '5_Chevals_de_la_gallerie',
+            'Roiroi'
           );
 
           expect(res.status).toHaveBeenCalledWith(400);
@@ -313,12 +330,17 @@ describe('Customers Controller', () => {
               id: 'customerId',
             },
             body: {
-              firstname: 'Jean',
-              lastname: 'Quartier',
-              mail: 'jeanquartier@example.com',
-              password: 'fesfesf51541fsef',
+                firstname: 'Jean',
+                lastname: 'Quartier',
+                mail: 'jeanquartier@example.com',
+                password: 'securepassword',
+                zipCode: '5182',
+                address: '5_Chevals_de_la_gallerie',
+                town: 'Roiroi'
             },
           };
+
+          const hashedPassword = '$2a$10$SomeHashedPassword';
     
           const res = {
             status: jest.fn().mockReturnThis(),
@@ -337,7 +359,10 @@ describe('Customers Controller', () => {
             'Jean',
             'Quartier',
             'jeanquartier@example.com',
-            'fesfesf51541fsef'
+            hashedPassword,
+            '5182',
+            '5_Chevals_de_la_gallerie',
+            'Roiroi'
           );
           expect(res.status).toHaveBeenCalledWith(204);
           expect(res.send).toHaveBeenCalled();
@@ -355,8 +380,13 @@ describe('Customers Controller', () => {
             body: {
               mail: 'Newmail@example.com',
               password: 'Newpassword',
+              zipCode: 'NewzipCode',
+              address: 'Newaddress',
+              town: 'Newtown'
             },
           };
+
+          const hashedPassword = '$2a$10$SomeHashedPassword';
     
           const res = {
             status: jest.fn().mockReturnThis(),
@@ -370,7 +400,7 @@ describe('Customers Controller', () => {
           await updateCustomerById(req, res, 'customerId', 'customer');
     
           expect(getCustomerByIdService).toHaveBeenCalledWith('customerId');
-          expect(updateCustomerByCustomerService).toHaveBeenCalledWith('customerId', 'Newmail@example.com', 'Newpassword');
+          expect(updateCustomerByCustomerService).toHaveBeenCalledWith('customerId', 'Newmail@example.com', hashedPassword, 'NewzipCode','Newaddress','Newtown');
 
           expect(res.status).toHaveBeenCalledWith(204);
           expect(res.send).toHaveBeenCalled();
@@ -386,8 +416,11 @@ describe('Customers Controller', () => {
               id: 'CustomerIdNotFound',
             },
             body: {
-              mail: 'Newmail@example.com',
-              password: 'Newpassword',
+                mail: 'Newmail@example.com',
+                password: 'Newpassword',
+                zipCode: 'NewzipCode',
+                address: 'Newaddress',
+                town: 'Newtown'
             },
           };
         
@@ -423,8 +456,11 @@ describe('Customers Controller', () => {
               id: 'customerId',
             },
             body: {
-              mail: 'newmail@example.com',
-              password: 'newpassword',
+                mail: 'Newmail@example.com',
+                password: 'Newpassword',
+                zipCode: 'NewzipCode',
+                address: 'Newaddress',
+                town: 'Newtown'
             },
           };
           
@@ -443,15 +479,10 @@ describe('Customers Controller', () => {
           // Assertions
           expect(getCustomerByIdService).toHaveBeenCalledWith('customerId');
           expect(res.status).toHaveBeenCalledWith(401);
-          expect(res.json).toHaveBeenCalledWith({ success: false, message: 'Access forbidden' });
+          expect(res.json).toHaveBeenCalledWith({ success: false, message: 'Access forbidden: You cannot modify an account that does not belong to you' });
           
           // Reset mock
           jest.clearAllMocks();
         });
     });   
 });
-=======
-//Import
-
-//Tests
->>>>>>> 5c133cc6e6def474b354795cc9fb49a5f4744ed1
