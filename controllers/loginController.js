@@ -25,7 +25,7 @@ exports.authMiddleware = (allowedRoles) => (req, res, next) => {
 }
 
 exports.login = async (req, res) => {
-      
+    if (req.body.mail && req.body.password && req.body.role) {
         let user;
         let role = req.body.role.toLowerCase();
         if (role=="customer") {
@@ -59,4 +59,8 @@ exports.login = async (req, res) => {
         } else {
             return res.status(404).json({success: false, message: 'This user doesn\'t exists'});
         }
+
+    } else {
+        return res.status(400).json({success: false, message: 'mail, password and role are required'});
+    }
 }
