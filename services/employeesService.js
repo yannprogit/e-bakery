@@ -64,7 +64,7 @@ exports.deleteEmployeeById = async (id) => {
         }
     });
 
-    if (employee && employee.role == 2) {
+    if (employee.role==2) { //test
         const deliveryInProgress = await db.buy.findOne({
             where: {
                 deliverymanId: id,
