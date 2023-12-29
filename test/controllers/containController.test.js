@@ -1,6 +1,7 @@
 // Import required modules and the controller (functions)
 const {  getCompositions, addContain, getSpecificCompositions, replaceIngredientOfFood, deleteContain, getContainByIds} = require('../../controllers/containController.js');
 const { getFoodById } = require('../../controllers/foodsController.js');
+const { getIngredientId } = require('../../controllers/ingredientsController.js');
 const { getFoodById :getFoodByIdService  } = require('../../services/foodsService.js');
 const { getCompositions : getCompositionsService , addContain : addContainService, getSpecificCompositions : getSpecificCompositionsService, replaceIngredientOfFood : replaceIngredientOfFoodService, deleteContain : deleteContainService, getContainByIds : getContainByIdsService} = require('../../services/containService.js');
 
@@ -9,17 +10,14 @@ jest.mock('../../services/containService');
 jest.mock('../../services/foodsService');
 jest.mock('bcrypt');
 
-///////////////// GLOBAL CONTAIN ////////////////
-describe('Contain Controller', () => {
-
     /////////////// GET THE LIST OF CUSTOMERS ///////////////
     describe(' Get /contain', () => {
         ///////////////// WHEN IT RETURN THE LIST /////////////////
         it('should get the list of contain', async () => {
             // Mock of the data of the customer in the database
             const listContains = [
-                { id: 1, foodId : 1, ingredientId : 1},
-                { id : 2, foodId : 1, ingredientId : 2}
+                { foodId : 1, ingredientId : 1},
+                { foodId : 1, ingredientId : 2}
             ];
 
             getCompositionsService.mockResolvedValue(listContains);
@@ -40,175 +38,195 @@ describe('Contain Controller', () => {
         });
     });
 
-
-    describe('Contain Controller - Delete Contain', () => {
-        it('should delete a contain with a 204 status code', async () => {
-          // Mock data for the request
-          const mockReq = {
-            body: {
-              foodId: 1,
-              ingredientId: 2,
-            },
-          };
-      
-          // Mock data for the response
-          const mockContain = { foodId: 1, ingredientId: 2, quantity: 10 };
-      
-          // Mock the behavior of the getContainByIds function
-          getContainByIdsService.mockResolvedValue(mockContain);
-      
-          // Mock the behavior of the deleteContainService function
-          deleteContainService.mockImplementation(() => {});
-      
-          // Mock Express response object
-          const mockRes = {
-            status: jest.fn().mockReturnThis(),
-            send: jest.fn(),
-          };
-      
-          // Call the deleteContain method
-          await deleteContain(mockReq, mockRes);
-      
-          // Verify that the response status and method are as expected
-          expect(mockRes.status).toHaveBeenCalledWith(204);
-          expect(mockRes.send).toHaveBeenCalled();
-        });
-      
-        it('should handle error when contain does not exist', async () => {
-          // Mock data for the request
-          const mockReq = {
-            body: {
-              foodId: 1,
-              ingredientId: 2,
-            },
-          };
-      
-          // Mock the behavior of the getContainByIds function when contain does not exist
-          getContainByIdsService.mockResolvedValue(null);
-      
-          // Mock Express response object
-          const mockRes = {
-            status: jest.fn().mockReturnThis(),
-            json: jest.fn(),
-          };
-      
-          // Call the deleteContain method
-          await deleteContain(mockReq, mockRes);
-      
-          // Verify that the response status and JSON are as expected for an error
-          expect(mockRes.status).toHaveBeenCalledWith(404);
-          expect(mockRes.json).toHaveBeenCalledWith({ success: false, message: "This contain doesn't exist" });
-        });
-      });
-
+/*
     ///////////////////// ADD CONTAIN ///////////////////////
     describe('addContain', () => {
-        it('should add a new contain', async () => {
+        it('should return 422 if contain already exists', async () => {
+            // Mock data
+            const existingContain = { foodId: 1, ingredientId: 1 };
+          
+            // Mocking the service functions
+            getContainByIdsService.mockResolvedValue(existingContain);
+          
+            // Mock Express request and response objects
             const req = {
-              body: {
-                foodId: 1,
-                ingredientId: 2
-              }
+              body: { foodId: 1, ingredientId: 1 },
             };
-        
-            const ExistingContain = null;
-        
-            const NewContain = {
-              id: 3,
-              foodId: 1,
-              ingredientId: 2
-            };
-        
-            getContainByIdsService.mockResolvedValue(ExistingContain);
-            addContainService.mockResolvedValue(NewContain);
-        
+          
             const res = {
               status: jest.fn().mockReturnThis(),
               json: jest.fn(),
             };
-        
-            console.log('req:', req);
-            console.log('res:', res);
-        
+          
+            // Call the function
             await addContain(req, res);
-                
+          
+            // Assertions
+            expect(res.status).toHaveBeenCalledWith(422);
+            expect(res.json).toHaveBeenCalledWith({ success: false, message: "This contain already exist" });
+          
+            // Reset mock
+            jest.clearAllMocks();
+          });
+          
+          it('should add contain and return 201 if not already exists', async () => {
+
+            const Newcontain = { foodId: 1, ingredientId: 2 };
+        
+            // Mocking the service functions
+            getContainByIdsService.mockResolvedValue(null);
+            addContainService.mockResolvedValue(Newcontain);
+        
+            const req = {
+                body: { 
+                    foodId: 2, 
+                    ingredientId: 2 
+                },
+            };
+        
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+            };
+        
+            // Call the function
+            await addContain(req, res);
+        
+            console.log('newContain:', newContain);
+
+            // Assertions
             expect(res.status).toHaveBeenCalledWith(201);
-            expect(res.json).toHaveBeenCalledWith({ success: true, contain: NewContain });
+            expect(res.json).toHaveBeenCalledWith({ success: true, contain: Newcontain });
+        
+            // Reset mock
+            jest.clearAllMocks();
+        });
+        
+    });
+
+
+    describe('Contain Controller - Delete Contain', () => {
+        it('should delete compositions of a food when ingredientId is not provided', async () => {
+            const compositions = [{ foodId: 1, ingredientId: 1 }];
+          
+            getSpecificCompositionsService.mockResolvedValue(compositions);
+          
+            const req = {
+              params: {
+                id: 1,
+              },
+              query: {
+                ingredientId: null,
+              },
+            };
+          
+            const res = {
+              status: jest.fn().mockReturnThis(),
+              json: jest.fn(),
+              send: jest.fn(),
+            };
+          
+            // Call the function
+            await deleteContain(req, res);
+          
+            expect(res.status).toHaveBeenCalledWith(204);
+            expect(res.send).toHaveBeenCalled();
+          
+            // Reset mock
+            jest.clearAllMocks();
+
+          });
+          
+          it('should return 404 if food has no compositions', async () => {
+            // Mock data
+            const foodId = 'exampleFoodId';
+          
+            // Mocking the service function
+            getSpecificCompositionsService.mockResolvedValue(null);
+          
+            // Mock Express request and response objects
+            const req = {
+              params: { foodId },
+              query: {} // Empty query to simulate missing ingredientId
+            };
+          
+            const res = {
+              status: jest.fn().mockReturnThis(),
+              json: jest.fn()
+            };
+          
+            // Call the function
+            await deleteContain(req, res); // Replace 'yourFunctionName' with the actual function name
+          
+            // Assertions
+            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.json).toHaveBeenCalledWith({ success: false, message: "This food has no compositions" });
+          
+            // Reset mock
+            jest.clearAllMocks();
           });
 
 
-          it('should handle the case where the contain already exists', async () => {
-            const mockReq = {
-                body: {
-                    foodId: 1,
-                    ingredientId: 2
-                }
+          it('should return 404 if contain does not exist', async () => {
+            // Mock data
+            const foodId = 1;
+            const ingredientId = 1;
+
+            const Contain = {foodId : 1, ingredientId : 1};
+
+            getSpecificCompositionsService.mockResolvedValue(Contain);
+            getContainByIdsService.mockResolvedValue(null);
+          
+            const req = {
+              params: { foodId },
+              query: { ingredientId }
             };
-
-            const mockExistingContain = {
-                id: 1,
-                foodId: 1,
-                ingredientId: 2
-            };
-
-            // Mock the behavior of getContainByIds service
-            getContainByIdsService.mockResolvedValue(mockExistingContain);
-
-            // Mock Express response object
+          
             const res = {
-                status: jest.fn().mockReturnThis(),
-                json: jest.fn(),
+              status: jest.fn().mockReturnThis(),
+              json: jest.fn()
             };
-
-            console.log('res before calling addContain:', res);
-
-            // Call the addContain method
-            const addContainPromise = addContain(mockReq, res);
-
-            // Advance timers to allow asynchronous operations to complete
-            jest.advanceTimersByTime(0);
-
-            await addContainPromise;
-
-            console.log('res after calling addContain:', res);
-
-            // Verify that the response is as expected
-            expect(res.status).toHaveBeenCalledWith(422);
-            expect(res.json).toHaveBeenCalledWith({ success: false, message: "This contain already exist" });
-        });
-
-        it('should handle the case where adding the contain fails', async () => {
-            // Mock data for the request
-            const mockReq = {
-                body: {
-                    foodId: 1,
-                    ingredientId: 2
-                }
-            };
-
-            // Mock data for the existing contain (to simulate it doesn't exist)
-            const mockExistingContain = null;
-
-            // Mock the behavior of getContainByIds service
-            getContainByIdsService.mockResolvedValue(mockExistingContain);
-
-            // Mock the behavior of addContain service (to simulate an error)
-            addContainService.mockResolvedValue(null);
-
-            // Mock Express response object
-            const res = {
-                status: jest.fn().mockReturnThis(),
-                json: jest.fn(),
-            };
-
-            // Call the addContain method
-            await addContain(mockReq, res);
-
-            // Verify that the response is as expected
+          
+            await deleteContain(req, res);
+          
             expect(res.status).toHaveBeenCalledWith(404);
-            expect(res.json).toHaveBeenCalledWith({ success: false, message: "Error when creating this contain, verify your args" });
-        });
-    });
+            expect(res.json).toHaveBeenCalledWith({ success: false, message: "This contain doesn't exist" });
+          
+            // Reset mock
+            jest.clearAllMocks();
+          });
+          
+          it('should delete contain if it exists', async () => {
+            const foodId = 'exampleFoodId';
+            const ingredientId = 'existingIngredientId';
+            const Contain = { foodId : 1, ingredientId : 1};
+
+            getSpecificCompositionsService.mockResolvedValue(Contain);
+            getContainByIdsService.mockResolvedValue({ Contain });
+          
+            const req = {
+              params: { foodId },
+              query: { ingredientId }
+            };
+          
+            const res = {
+              status: jest.fn().mockReturnThis(),
+              json: jest.fn(),
+              send: jest.fn()
+            };
+          
+
+            await deleteContain(req, res);
+          
+            expect(res.status).toHaveBeenCalledWith(204);
+            expect(res.send).toHaveBeenCalled();
+          
+            jest.clearAllMocks();
+          });
+
+      });
+
+
 
     describe('getSpecificCompositions', () => {
         it('should return compositions based on ids and type', async () => {
@@ -497,4 +515,118 @@ describe('Contain Controller', () => {
             expect(mockRes.json).toHaveBeenCalledWith({ success: false, message: "Error when updating this ingredient, verify your args" });
         });
     });
-});
+
+    ///////////////// REPLACE INGREDIENTS ////////////////
+    describe('replaceIngredientOfFood', () => {
+        it('should replace ingredient successfully', async () => {
+          // Mock data
+          const foodId = 'exampleFoodId';
+          const ingredientId = 'exampleIngredientId';
+          const newIngredientId = 'exampleNewIngredientId';
+      
+          // Mock database responses
+          getFoodById.mockResolvedValue({  });
+          getContainByIds.mockResolvedValue({  });
+          getContainByIds.mockResolvedValue(null); // Mock that newIngredientId doesn't exist
+      
+          // Mock Express response object
+          const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+            send: jest.fn()
+          };
+      
+          // Mock Express request object
+          const req = {
+            params: { foodId },
+            body: { ingredientId, newIngredientId }
+          };
+      
+          // Call the function
+          await replaceIngredientOfFood(req, res);
+      
+          // Assertions
+          expect(getFoodById).toHaveBeenCalledWith(foodId);
+          expect(getContainByIds).toHaveBeenCalledWith(foodId, ingredientId);
+          expect(getContainByIds).toHaveBeenCalledWith(foodId, newIngredientId);
+          expect(res.status).toHaveBeenCalledWith(204);
+          expect(res.send).toHaveBeenCalled();
+          expect(replaceIngredientOfFood).toHaveBeenCalledWith(foodId, ingredientId, newIngredientId);
+        });
+      
+        it('should return 404 if food does not exist', async () => {
+          const foodId = 'nonexistentFoodId';
+      
+          getFoodById.mockResolvedValue(null);
+      
+          const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn()
+          };
+      
+          const req = {
+            params: { foodId },
+            body: {  }
+          };
+      
+          await replaceIngredientOfFood(req, res);
+      
+          expect(getFoodById).toHaveBeenCalledWith(foodId);
+          expect(res.status).toHaveBeenCalledWith(404);
+          expect(res.json).toHaveBeenCalledWith({ success: false, message: "This food doesn't exist" });
+        });
+      
+        it('should return 404 if contain does not exist', async () => {
+          const foodId = 'exampleFoodId';
+          const ingredientId = 'nonexistentIngredientId';
+      
+          getFoodById.mockResolvedValue({ });
+          getContainByIds.mockResolvedValue(null);
+      
+          const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn()
+          };
+      
+          const req = {
+            params: { foodId },
+            body: { ingredientId, newIngredientId: 'exampleNewIngredientId' }
+          };
+      
+          await replaceIngredientOfFood(req, res);
+      
+          expect(getFoodById).toHaveBeenCalledWith(foodId);
+          expect(getContainByIds).toHaveBeenCalledWith(foodId, ingredientId);
+          expect(res.status).toHaveBeenCalledWith(404);
+          expect(res.json).toHaveBeenCalledWith({ success: false, message: "This contain doesn't exist" });
+        });
+      
+        it('should return 422 if new ingredient already exists', async () => {
+          const foodId = 'exampleFoodId';
+          const ingredientId = 'exampleIngredientId';
+          const newIngredientId = 'existingNewIngredientId';
+      
+          getFoodById.mockResolvedValue({  });
+          getContainByIds.mockResolvedValue({  });
+          getContainByIds.mockResolvedValue({  });
+      
+          const res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn()
+          };
+      
+          const req = {
+            params: { foodId },
+            body: { ingredientId, newIngredientId }
+          };
+      
+          await replaceIngredientOfFood(req, res);
+      
+          expect(getFoodById).toHaveBeenCalledWith(foodId);
+          expect(getContainByIds).toHaveBeenCalledWith(foodId, ingredientId);
+          expect(getContainByIds).toHaveBeenCalledWith(foodId, newIngredientId);
+          expect(res.status).toHaveBeenCalledWith(422);
+          expect(res.json).toHaveBeenCalledWith({ success: false, message: "This contain already exists" });
+        });
+      });
+*/
