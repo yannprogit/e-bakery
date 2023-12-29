@@ -19,7 +19,7 @@ exports.addFood = async (req, res) => {
     else {
         res.status(400).json({success: false, message: "The stock must be over 0"});
     }
- }
+}
 
 //Get a food
 exports.getFoodById = async (req, res) => {
@@ -39,7 +39,7 @@ exports.deleteFoodById = async (req, res) => {
         res.status(404).json({success: false, message: "This food doesn't exist"});
     }
     else {
-        const deletedFood = deleteFoodById(req.params.id);
+        const deletedFood = await deleteFoodById(req.params.id);
         if (deletedFood) {
             res.status(204).send();
         }
