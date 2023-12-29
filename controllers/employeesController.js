@@ -1,6 +1,8 @@
 //------------- Import -------------
 const { getEmployees, getEmployeesByRole, getEmployeeById, addEmployee, deleteEmployeeById, updateEmployeeByEmployee, updateEmployeeByAdmin, updateEndContract } = require('../services/employeesService.js');
 const bcrypt = require('bcrypt');
+const Ajv = require('ajv');
+const ajv = new Ajv();
 
 //------------- Methods -------------
 //Get the list of employees
@@ -72,30 +74,89 @@ exports.updateEmployeeById = async (req, res, id, role) => {
         res.status(404).json({success: false, message: "This employee doesn't exist"});
     }
     else if (role=="admin") {
-        const employee = await updateEmployeeByAdmin(req.params.id, req.body.firstname, req.body.lastname, req.body.mail, await bcrypt.hash(req.body.password, 10));
-        if (employee) {
-            res.status(204).send();
+        const schema = {
+            type: 'object',
+            properties: {
+              firstname: { type: 'string' },
+              lastname: { type: 'string' },
+              mail: { type: 'string' },
+              password: { type: 'string' },
+              endContract: { type: ['string', 'null'] },
+            },
+            required: ['firstname', 'lastname', 'mail', 'password'],
+          };
+        const validateBody = ajv.validate(schema, req.body);
+        if (!validateBody) {
+            res.status(400).json({success: false, message: ajv.errors});
         }
         else {
-            res.status(422).json({success: false, message: "This mail is already linked on an account"});
+            const employee = await updateEmployeeByAdmin(req.params.id, req.body.firstname, req.body.lastname, req.body.mail, await bcrypt.hash(req.body.password, 10), req.body.endContract);
+            if (employee) {
+                res.status(204).send();
+            }
+            else {
+                res.status(422).json({success: false, message: "This mail is already linked on an account"});
+            }
         }
     }
     else if (role=="manager") {
-        const employee = await updateEndContract(req.params.id, req.body.endContract);
-        if (!employee) {
-            res.status(422).json({success: false, message: "Deliveries are scheduled after the new contract end date"});
+        const schema = {
+            type: 'object',
+            properties: {
+              endContract: { type: ['string', 'null'] }
+            }
+          };
+        const validateBody = ajv.validate(schema, req.body);
+        const format = /^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}:\d{2})?$/;
+        if (!validateBody) {
+            res.status(400).json({success: false, message: ajv.errors});
+        }
+        else if (!format.test(req.body.endContract)) {
+            res.status(400).json({ success: false, message: 'endContract must be a valid date' });
         }
         else {
-            res.status(204).send(); 
+            if ([1, 5].includes(employee.role)) {
+                res.status(403).json({ success: false, message: 'Access forbidden: You cannot modify the account of an admin or another manager' });
+            }
+            else {
+                const today = new Date();
+                const endContractDate = new Date(req.body.endContract);
+                if ((endContractDate <= today)&&(req.body.endContract!==null)) {
+                    res.status(422).json({success: false, message: "This date has passed"});
+                }
+                else {
+                    const employee = await updateEndContract(req.params.id, req.body.endContract);
+                    if (!employee) {
+                        res.status(422).json({success: false, message: "Deliveries are scheduled after the new contract end date"});
+                    }
+                    else {
+                        res.status(204).send(); 
+                    }
+                }
+            }
         }
     }
     else if (employee.id==id) {
-        const employee = await updateEmployeeByEmployee(req.params.id, req.body.mail, await bcrypt.hash(req.body.password, 10));
-        if (employee) {
-            res.status(204).send(); 
+        const schema = {
+            type: 'object',
+            properties: {
+              mail: { type: 'string', pattern: '^[^@\s]+@[^@\s]+\.[^@\s]+$' },
+              password: { type: 'string' }
+            },
+            required: ['mail', 'password'],
+          };
+        const validateBody = ajv.validate(schema, req.body);
+        if (!validateBody) {
+            res.status(400).json({success: false, message: ajv.errors});
         }
         else {
-            res.status(422).json({success: false, message: "This mail is already linked on an account"});
+            const employee = await updateEmployeeByEmployee(req.params.id, req.body.mail, await bcrypt.hash(req.body.password, 10));
+            if (employee) {
+                res.status(204).send(); 
+            }
+            else {
+                res.status(422).json({success: false, message: "This mail is already linked on an account"});
+            }
         }
     }
     else {

@@ -93,7 +93,7 @@ exports.deleteEmployeeById = async (id) => {
 }
 
 //Update the employee by its id (by admin)
-exports.updateEmployeeByAdmin = async (id, firstname, lastname, mail, password) => {
+exports.updateEmployeeByAdmin = async (id, firstname, lastname, mail, password, endContract) => {
     const employee = await db.employees.findOne({
         where: {
             id
@@ -113,7 +113,8 @@ exports.updateEmployeeByAdmin = async (id, firstname, lastname, mail, password) 
         firstname,
         lastname,
         mail,
-        password
+        password,
+        endContract: endContract !== null ? endContract : null
     }, 
     { where: {
             id
@@ -170,7 +171,7 @@ exports.updateEndContract = async (id, endContract) => {
     }
 
     return await db.employees.update({
-        endContract
+        endContract: endContract !== null ? endContract : null
     }, 
     { where: {
             id

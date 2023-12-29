@@ -25,42 +25,37 @@ exports.authMiddleware = (allowedRoles) => (req, res, next) => {
 }
 
 exports.login = async (req, res) => {
-    if (req.body.mail && req.body.password && req.body.role) {
-        let user;
-        let role = req.body.role.toLowerCase();
-        if (role=="customer") {
-            user = await db.customers.findOne({
-                where: {mail: req.body.mail}
-            });
-        }
-        else {
-            user = await db.employees.findOne({
-                where: {mail: req.body.mail}
-            });
-            if (user) {
-                role = await getRole(user.role);
-
-                let today = new Date();
-                let endContract = user.endContract ? new Date(user.endContract) : null;
-                if ((endContract!=null)&&(today>endContract)) {
-                    return res.status(422).json({success: false, message: 'Your contract has expired, you can no longer connect'});
-                }
-            } 
-        }
-
+    let user;
+    let role = req.body.role.toLowerCase();
+    if (role=="customer") {
+        user = await db.customers.findOne({
+            where: {mail: req.body.mail}
+        });
+    }
+    else {
+        user = await db.employees.findOne({
+            where: {mail: req.body.mail}
+        });
         if (user) {
-            const verifiedUser = await bcrypt.compare(req.body.password, user.password);
-            if (verifiedUser) {
-                const token = jwt.sign({ id: user.id, mail: user.mail, role: role }, process.env.secretKey, { expiresIn: '1h' });
-                return res.status(200).json({success: true, token, role: role});
-            } else {
-                return res.status(401).json({success: false, message: 'Password is incorrect'});
-            }
-        } else {
-            return res.status(404).json({success: false, message: 'This user doesn\'t exists'});
-        }
+            role = await getRole(user.role);
 
+            let today = new Date();
+            let endContract = user.endContract ? new Date(user.endContract) : null;
+            if ((endContract!=null)&&(today>endContract)) {
+                return res.status(422).json({success: false, message: 'Your contract has expired, you can no longer connect'});
+            }
+        } 
+    }
+
+    if (user) {
+        const verifiedUser = await bcrypt.compare(req.body.password, user.password);
+        if (verifiedUser) {
+            const token = jwt.sign({ id: user.id, mail: user.mail, role: role }, process.env.secretKey, { expiresIn: '1h' });
+            return res.status(200).json({success: true, token, role: role});
+        } else {
+            return res.status(401).json({success: false, message: 'Password is incorrect'});
+        }
     } else {
-        return res.status(400).json({success: false, message: 'mail, password and role are required'});
+        return res.status(404).json({success: false, message: 'This user doesn\'t exists'});
     }
 }

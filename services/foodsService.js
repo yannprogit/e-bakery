@@ -168,7 +168,7 @@ exports.updateFoodByBaker = async (id, name, description, addStock) => {
 
         const ingredientStocks = ingredients.map(ingredient => ingredient.stock - addStock);
         if (ingredientStocks.some(stock => stock < 0)) {
-            return "noIngredients";
+            return false;
         }
         else {
             for (let i = 0; i < ingredients.length; i++) {
@@ -185,6 +185,9 @@ exports.updateFoodByBaker = async (id, name, description, addStock) => {
                   );
             }
         }
+    }
+    else {
+        return "noCompositions";
     }
 
     let addedStock = food.stock + addStock;
