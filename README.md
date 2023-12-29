@@ -6,9 +6,14 @@ This api responds to the fact that we don't necessarily have a bakery nearby, an
 Getting started:
 - Create an empty database named "e-bakery" on phpmyadmin or similar.
 - execute the node server.js command
-- you can populate the database with the /populate-db route (you will need to be logged in with an admin account to do this).
+- you can populate the database with the /populate-db route (you will need to be logged in with an admin account to do this (mail: "yacowan.keebrady@gmail.com", password: "mdp")).
+
+Rights :
+There are 2 types of users, customers and employees, and among the employees, there are admin, manager, baker, cashier, deliveryman.
+
+- Customers: add a buy, get its buy, 
 
 About the team:
 The project was realized by Yann Sady and Nicolas Keerpal.
 
-We had a final developer Swan Breton, but unfortunately he had to leave the project on December 8, 2023, we still thank him for his contribution.
+We had a final developer Swan Breton, but unfortunately he had to leave the project on December 12, 2023, we still thank him for his contribution.
