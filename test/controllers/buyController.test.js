@@ -1,5 +1,5 @@
-const { getPurchases, addBuy, getBuyById, deleteBuyById, updateDeliveryDate, updateStatus, updateValidation} = require('../../controllers/buyController.js');
-const { getPurchases: getPurchasesService, addBuy : addBuyService, getBuyById : getBuyByIdService, deleteBuyById : deleteBuyByIdService, updateDeliveryDate : updateDeliveryDateService } = require('../../services/buyService.js');
+const { getPurchases, addBuy, getBuyById, deleteBuyById, updateDeliveryDate, updateStatus, updateValidation, updateBuyById} = require('../../controllers/buyController.js');
+const { getPurchases: getPurchasesService, addBuy : addBuyService, getBuyById : getBuyByIdService, deleteBuyById : deleteBuyByIdService, updateDeliveryDate : updateDeliveryDateService, updateBuyById : updateBuyByIdService, updateStatus: updateStatusService } = require('../../services/buyService.js');
 const { getFoods: getFoodsService, getFoodById : getFoodByIdService } = require('../../services/foodsService.js');
 
 // Mocking the services
@@ -240,4 +240,706 @@ describe('deleteBuyById', () => {
   });
 });
 
+
+
+
 ///////////////// UPDATE BUY BY ID ////////////////
+describe('updateBuyById', () => {
+  afterEach(() => {
+      jest.clearAllMocks();
+  });
+
+  it('should return 404 if the buy does not exist', async () => {
+      // Mock the getBuyById function to resolve with null, indicating that the buy does not exist
+      getBuyByIdService.mockResolvedValue(null);
+
+      // Mock Express request and response objects
+      const req = {
+          params: { id: 'exampleBuyId' },
+      };
+
+      const res = {
+          status: jest.fn().mockReturnThis(),
+          json: jest.fn(),
+      };
+
+      // Call the function
+      await updateBuyById(req, res, 'exampleUserId', 'customer');
+
+      // Assertions
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({ success: false, message: "This buy doesn't exist" });
+  });
+
+  it('should return 403 if the user does not have permission to update the buy', async () => {
+    // Mock the getBuyById function to resolve with a buy object
+    const mockBuy = {
+        id: 'exampleBuyId',
+        customerId: 'otherUserId', // A different user ID
+        deliverymanId: 'exampleDeliverymanId',
+        // ... other properties
+    };
+    getBuyByIdService.mockResolvedValue(mockBuy);
+
+    // Mock Express request and response objects
+    const req = {
+        params: { id: 'exampleBuyId' },
+    };
+
+    const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+    };
+
+    // Call the function
+    await updateBuyById(req, res, 'exampleUserId', 'customer');
+
+    // Assertions
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Access forbidden: You cannot update an order that does not belong to you',
+    });
+});
+
+it('should allow access for Customer with matching ID', async () => {
+  // Mock the getBuyById function to resolve with a buy object
+  const mockBuy = {
+    id: 'exampleBuyId',
+    customerId: 'exampleCustomerId',
+    // ... other properties
+  };
+  getBuyByIdService.mockResolvedValue(mockBuy);
+
+  // Mock Express request and response objects
+  const req = {
+    params: { id: 'exampleBuyId' },
+    body: {},
+  };
+
+  const res = {
+    json: jest.fn(),
+    status: jest.fn().mockReturnThis(),
+    send: jest.fn(),
+  };
+
+  // Call the function
+  await updateBuyById(req, res, 'exampleCustomerId', 'customer');
+
+  // Check if access is allowed
+  expect(res.status).not.toHaveBeenCalledWith(403);
+  expect(res.json).not.toHaveBeenCalledWith({
+    success: false,
+    message: 'Access forbidden: You cannot update an order that does not belong to you',
+  });
+});
+
+it('should allow access for Deliveryman with matching ID', async () => {
+  // Mock the getBuyById function to resolve with a buy object
+  const mockBuy = {
+    id: 'exampleBuyId',
+    deliverymanId: 'exampleDeliverymanId',
+    // ... other properties
+  };
+  getBuyByIdService.mockResolvedValue(mockBuy);
+
+  // Mock Express request and response objects
+  const req = {
+    params: { id: 'exampleBuyId' },
+    body: {},
+  };
+
+  const res = {
+    json: jest.fn(),
+    status: jest.fn().mockReturnThis(),
+    send: jest.fn(),
+  };
+
+  // Call the function
+  await updateBuyById(req, res, 'exampleDeliverymanId', 'deliveryman');
+
+  // Check if access is allowed
+  expect(res.status).not.toHaveBeenCalledWith(403);
+  expect(res.json).not.toHaveBeenCalledWith({
+    success: false,
+    message: 'Access forbidden: You cannot update an order that does not belong to you',
+  });
+});
+
+it('should allow access for Admin (temporary customer role) when updating customer-related information', async () => {
+  // Mock the getBuyById function to resolve with a buy object
+  const mockBuy = {
+    id: 'exampleBuyId',
+    customerId: 'exampleCustomerId',
+    // ... other properties
+  };
+  getBuyByIdService.mockResolvedValue(mockBuy);
+
+  // Mock Express request and response objects
+  const req = {
+    params: { id: 'exampleBuyId' },
+    body: {},
+  };
+
+  const res = {
+    json: jest.fn(),
+    status: jest.fn().mockReturnThis(),
+    send: jest.fn(),
+  };
+
+  // Call the function
+  await updateBuyById(req, res, 'exampleAdminId', 'admin');
+
+  // Check if access is allowed
+  expect(res.status).not.toHaveBeenCalledWith(403);
+  expect(res.json).not.toHaveBeenCalledWith({
+    success: false,
+    message: 'Access forbidden: You cannot update an order that does not belong to you',
+  });
+});
+
+it('should allow access for Admin (temporary deliveryman role) when updating deliveryman-related information', async () => {
+  // Mock the getBuyById function to resolve with a buy object
+  const mockBuy = {
+    id: 'exampleBuyId',
+    deliverymanId: 'exampleDeliverymanId',
+    // ... other properties
+  };
+  getBuyByIdService.mockResolvedValue(mockBuy);
+
+  // Mock Express request and response objects
+  const req = {
+    params: { id: 'exampleBuyId' },
+    body: {},
+  };
+
+  const res = {
+    json: jest.fn(),
+    status: jest.fn().mockReturnThis(),
+    send: jest.fn(),
+  };
+
+  // Call the function
+  await updateBuyById(req, res, 'exampleAdminId', 'admin');
+
+  // Check if access is allowed
+  expect(res.status).not.toHaveBeenCalledWith(403);
+  expect(res.json).not.toHaveBeenCalledWith({
+    success: false,
+    message: 'Access forbidden: You cannot update an order that does not belong to you',
+  });
+});
+
+
+it('should update delivery date and return status 422 for a deliveryman', async () => {
+      // Mock the getBuyById function to resolve with a buy object
+      const mockBuy = {
+        id: 'exampleBuyId',
+        deliverymanId: 'exampleUserId',
+        deliveryDate : "20/08/2028"
+    };
+
+    const req = {
+        params: {
+           id: 'exampleBuyId'
+           },
+    };
+
+    getBuyByIdService.mockResolvedValue(mockBuy);
+    updateDeliveryDateService.mockResolvedValue("20/08/2028")
+
+    const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+    };
+
+    // Call the function
+    await updateBuyById(req, res, 'exampleUserId', 'deliveryman');
+
+    // Assertions
+    expect(res.status).toHaveBeenCalledWith(422);
+    expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'The delivery of this buy is already finished',
+    });
+});
+
+it('should update delivery date and return status 204 for a deliveryman', async () => {
+  // Mock the getBuyById function to resolve with a buy object
+  const mockBuy = {
+    id: 'exampleBuyId',
+    deliverymanId: 'exampleUserId',
+    deliveryDate: null, // Assuming the delivery date is initially null
+  };
+
+  const req = {
+    params: {
+      id: 'exampleBuyId',
+    },
+  };
+
+  getBuyByIdService.mockResolvedValue(mockBuy);
+  updateDeliveryDateService.mockResolvedValue(); // Assuming the updateDeliveryDateService doesn't return any specific data
+
+  const res = {
+    status: jest.fn().mockReturnThis(),
+    json: jest.fn(),
+    send: jest.fn(),
+  };
+
+  // Call the function
+  await updateBuyById(req, res, 'exampleUserId', 'deliveryman');
+
+  // Assertions
+  expect(res.status).toHaveBeenCalledWith(204);
+  expect(res.json).not.toHaveBeenCalled(); // Assuming there's no JSON response
+  expect(res.send).toHaveBeenCalled(); // Assuming there's a call to res.send() after successful delivery date update
+});
+
+
+
+it('should update buy status to "pending" and return status 204 for a cart with valid time', async () => {
+  // Arrange
+  const mockBuyId = 1;
+  const mockUserId = 123;
+  const mockUserRole = 'customer';
+
+  const mockBuy = {
+    id: mockBuyId,
+    customerId: mockUserId,
+    deliverymanId: null,
+    status: 'cart',
+  };
+
+  // Mock the getBuyById function to return the mockBuy object
+  getBuyByIdService.mockResolvedValueOnce(mockBuy);
+
+  // Mock the updateStatus function to return a valid status
+  updateStatusService.mockResolvedValueOnce('validStatus');
+
+  // Mock the request object
+  const mockReq = {
+    params: { id: mockBuyId },
+    body: { hour: '12:30' },
+    user: { id: mockUserId, role: mockUserRole },
+  };
+
+  // Mock the response object
+  const mockRes = {
+    status: jest.fn().mockReturnThis(),
+    send: jest.fn(),
+    json: jest.fn(),
+  };
+
+  // Act
+  await updateBuyById(mockReq, mockRes);
+
+  // Assert
+  expect(getBuyByIdService).toHaveBeenCalledWith(mockBuyId);
+  expect(updateStatusService).toHaveBeenCalledWith(mockBuyId, '12:30');
+  expect(mockRes.status).toHaveBeenCalledWith(204);
+  expect(mockRes.send).toHaveBeenCalled();
+});
+
+it('should return status 422 for cart with invalid time', async () => {
+  // Arrange
+  const mockBuyId = 1;
+  const mockUserId = 123;
+  const mockUserRole = 'customer';
+
+  const mockBuy = {
+    id: mockBuyId,
+    customerId: mockUserId,
+    deliverymanId: null,
+    status: 'cart',
+  };
+
+  // Mock the getBuyById function to return the mockBuy object
+  getBuyByIdService.mockResolvedValueOnce(mockBuy);
+
+  // Mock the request object with an invalid time
+  const mockReq = {
+    params: { id: mockBuyId },
+    body: { hour: 'invalidTime' },
+    user: { id: mockUserId, role: mockUserRole },
+  };
+
+  // Mock the response object
+  const mockRes = {
+    status: jest.fn().mockReturnThis(),
+    json: jest.fn(),
+  };
+
+  // Act
+  await updateBuyById(mockReq, mockRes);
+
+  // Assert
+  expect(getBuyByIdService).toHaveBeenCalledWith(mockBuyId);
+  expect(updateStatusService).not.toHaveBeenCalled(); // Should not call updateStatus for invalid time
+  expect(mockRes.status).toHaveBeenCalledWith(422);
+  expect(mockRes.json).toHaveBeenCalledWith({ success: false, message: 'The time you have entered is incorrect, please enter a valid time (format: hour:min)' });
+});
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
+
+
+it('should update status for a cart with valid time', async () => {
+    // Arrange
+    const mockBuyId = 'exampleBuyId';
+    const mockUserId = 123;
+    const mockUserRole = 'customer';
+
+    const mockBuy = {
+      id: mockBuyId,
+      customerId: mockUserId,
+      deliverymanId: null,
+      status: 'cart',
+    };
+
+    // Mock the getBuyById function to return the mockBuy object
+    getBuyByIdService.mockResolvedValueOnce(mockBuy);
+
+    // Mock the updateStatus function to return a valid status
+    updateStatusService.mockResolvedValueOnce('validStatus');
+
+    // Mock the request object
+    const mockReq = {
+      params: { id: mockBuyId },
+      body: { hour: '12:30' },
+      user: { id: mockUserId, role: mockUserRole },
+    };
+
+    // Mock the response object
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+      json: jest.fn(),
+    };
+
+    // Act
+    await updateBuyById(mockReq, mockRes);
+
+    // Assert
+    expect(getBuyByIdService).toHaveBeenCalledWith(mockBuyId);
+    expect(updateStatusService).toHaveBeenCalledWith(mockBuyId, '12:30');
+    expect(mockRes.status).toHaveBeenCalledWith(204);
+    expect(mockRes.send).toHaveBeenCalled();
+  });
+
+  it('should return status 422 for cart with invalid time', async () => {
+    // Arrange
+    const mockBuyId = 'exampleBuyId';
+    const mockUserId = 123;
+    const mockUserRole = 'customer';
+
+    const mockBuy = {
+      id: mockBuyId,
+      customerId: mockUserId,
+      deliverymanId: null,
+      status: 'cart',
+    };
+
+    // Mock the getBuyById function to return the mockBuy object
+    getBuyByIdService.mockResolvedValueOnce(mockBuy);
+
+    // Mock the request object with an invalid time
+    const mockReq = {
+      params: { id: mockBuyId },
+      body: { hour: 'invalidTime' },
+      user: { id: mockUserId, role: mockUserRole },
+    };
+
+    // Mock the response object
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    // Act
+    await updateBuyById(mockReq, mockRes);
+
+    // Assert
+    expect(getBuyByIdService).toHaveBeenCalledWith(mockBuyId);
+    expect(updateStatusService).not.toHaveBeenCalled(); // Should not call updateStatus for invalid time
+    expect(mockRes.status).toHaveBeenCalledWith(422);
+    expect(mockRes.json).toHaveBeenCalledWith({
+      success: false,
+      message: 'The time you have entered is incorrect, please enter a valid time (format: hour:min)',
+    });
+  });
+
+  it('should return status 422 for cart with no foods in stock', async () => {
+    // Arrange
+    const mockBuyId = 'exampleBuyId';
+    const mockUserId = 123;
+    const mockUserRole = 'customer';
+
+    const mockBuy = {
+      id: mockBuyId,
+      customerId: mockUserId,
+      deliverymanId: null,
+      status: 'cart',
+    };
+
+    // Mock the getBuyById function to return the mockBuy object
+    getBuyByIdService.mockResolvedValueOnce(mockBuy);
+
+    // Mock the request object
+    const mockReq = {
+      params: { id: mockBuyId },
+      body: { hour: '12:30' },
+      user: { id: mockUserId, role: mockUserRole },
+    };
+
+    // Mock the updateStatus function to return 'noFoods'
+    updateStatusService.mockResolvedValueOnce('noFoods');
+
+    // Mock the response object
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    // Act
+    await updateBuyById(mockReq, mockRes);
+
+    // Assert
+    expect(getBuyByIdService).toHaveBeenCalledWith(mockBuyId);
+    expect(updateStatusService).toHaveBeenCalledWith(mockBuyId, '12:30');
+    expect(mockRes.status).toHaveBeenCalledWith(422);
+    expect(mockRes.json).toHaveBeenCalledWith({
+      success: false,
+      message: 'No more food in stock',
+    });
+  });
+
+  it('should return status 422 for cart with no available deliverymen', async () => {
+    // Arrange
+    const mockBuyId = 'exampleBuyId';
+    const mockUserId = 123;
+    const mockUserRole = 'customer';
+
+    const mockBuy = {
+      id: mockBuyId,
+      customerId: mockUserId,
+      deliverymanId: null,
+      status: 'cart',
+    };
+
+    // Mock the getBuyById function to return the mockBuy object
+    getBuyByIdService.mockResolvedValueOnce(mockBuy);
+
+    // Mock the request object
+    const mockReq = {
+      params: { id: mockBuyId },
+      body: { hour: '12:30' },
+      user: { id: mockUserId, role: mockUserRole },
+    };
+
+    // Mock the updateStatus function to return 'noDeliverymen'
+    updateStatusService.mockResolvedValueOnce('noDeliverymen');
+
+    // Mock the response object
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    // Act
+    await updateBuyById(mockReq, mockRes);
+
+    // Assert
+    expect(getBuyByIdService).toHaveBeenCalledWith(mockBuyId);
+    expect(updateStatusService).toHaveBeenCalledWith(mockBuyId, '12:30');
+    expect(mockRes.status).toHaveBeenCalledWith(422);
+    expect(mockRes.json).toHaveBeenCalledWith({
+      success: false,
+      message: 'No deliverymen available, please change delivery hour or order later',
+    });
+  });
+
+
+
+
+
+
+  it('should update status for a cart with valid time', async () => {
+    // Arrange
+    const mockBuyId = 'exampleBuyId';
+    const mockUserId = 123;
+    const mockUserRole = 'customer';
+
+    const mockBuy = {
+      id: mockBuyId,
+      customerId: mockUserId,
+      deliverymanId: null,
+      status: 'cart',
+    };
+
+    // Mock the getBuyById function to return the mockBuy object
+    getBuyByIdService.mockResolvedValueOnce(mockBuy);
+
+    // Mock the updateStatus function to return a valid status
+    updateStatusService.mockResolvedValueOnce('validStatus');
+
+    // Mock the request object
+    const mockReq = {
+      params: { id: mockBuyId },
+      body: { hour: '12:30' },
+      user: { id: mockUserId, role: mockUserRole },
+    };
+
+    // Mock the response object
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+      json: jest.fn(),
+    };
+
+    // Act
+    await updateBuyById(mockReq, mockRes);
+
+    // Assert
+    expect(getBuyByIdService).toHaveBeenCalledWith(mockBuyId);
+    expect(updateStatusService).toHaveBeenCalledWith(mockBuyId, '12:30');
+    expect(mockRes.status).toHaveBeenCalledWith(204);
+    expect(mockRes.send).toHaveBeenCalled();
+  });
+
+  it('should return status 422 for cart with invalid time', async () => {
+    // Arrange
+    const mockBuyId = 'exampleBuyId';
+    const mockUserId = 123;
+    const mockUserRole = 'customer';
+
+    const mockBuy = {
+      id: mockBuyId,
+      customerId: mockUserId,
+      deliverymanId: null,
+      status: 'cart',
+    };
+
+    // Mock the getBuyById function to return the mockBuy object
+    getBuyByIdService.mockResolvedValueOnce(mockBuy);
+
+    // Mock the request object with an invalid time
+    const mockReq = {
+      params: { id: mockBuyId },
+      body: { hour: 'invalidTime' },
+      user: { id: mockUserId, role: mockUserRole },
+    };
+
+    // Mock the response object
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    // Act
+    await updateBuyById(mockReq, mockRes);
+
+    // Assert
+    expect(getBuyByIdService).toHaveBeenCalledWith(mockBuyId);
+    expect(updateStatusService).not.toHaveBeenCalled(); // Should not call updateStatus for invalid time
+    expect(mockRes.status).toHaveBeenCalledWith(422);
+    expect(mockRes.json).toHaveBeenCalledWith({
+      success: false,
+      message: 'The time you have entered is incorrect, please enter a valid time (format: hour:min)',
+    });
+  });
+
+  it('should return status 422 for cart with no foods in stock', async () => {
+    // Arrange
+    const mockBuyId = 'exampleBuyId';
+    const mockUserId = 123;
+    const mockUserRole = 'customer';
+
+    const mockBuy = {
+      id: mockBuyId,
+      customerId: mockUserId,
+      deliverymanId: null,
+      status: 'cart',
+    };
+
+    // Mock the getBuyById function to return the mockBuy object
+    getBuyByIdService.mockResolvedValueOnce(mockBuy);
+
+    // Mock the request object
+    const mockReq = {
+      params: { id: mockBuyId },
+      body: { hour: '12:30' },
+      user: { id: mockUserId, role: mockUserRole },
+    };
+
+    // Mock the updateStatus function to return 'noFoods'
+    updateStatusService.mockResolvedValueOnce('noFoods');
+
+    // Mock the response object
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    // Act
+    await updateBuyById(mockReq, mockRes);
+
+    // Assert
+    expect(getBuyByIdService).toHaveBeenCalledWith(mockBuyId);
+    expect(updateStatusService).toHaveBeenCalledWith(mockBuyId, '12:30');
+    expect(mockRes.status).toHaveBeenCalledWith(422);
+    expect(mockRes.json).toHaveBeenCalledWith({
+      success: false,
+      message: 'No more food in stock',
+    });
+  });
+
+  it('should return status 422 for cart with no available deliverymen', async () => {
+    // Arrange
+    const mockBuyId = 'exampleBuyId';
+    const mockUserId = 123;
+    const mockUserRole = 'customer';
+
+    const mockBuy = {
+      id: mockBuyId,
+      customerId: mockUserId,
+      deliverymanId: null,
+      status: 'cart',
+    };
+
+    // Mock the getBuyById function to return the mockBuy object
+    getBuyByIdService.mockResolvedValueOnce(mockBuy);
+
+    // Mock the request object
+    const mockReq = {
+      params: { id: mockBuyId },
+      body: { hour: '12:30' },
+      user: { id: mockUserId, role: mockUserRole },
+    };
+
+    // Mock the updateStatus function to return 'noDeliverymen'
+    updateStatusService.mockResolvedValueOnce('noDeliverymen');
+
+    // Mock the response object
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    // Act
+    await updateBuyById(mockReq, mockRes);
+
+    // Assert
+    expect(getBuyByIdService).toHaveBeenCalledWith(mockBuyId);
+    expect(updateStatusService).toHaveBeenCalledWith(mockBuyId, '12:30');
+    expect(mockRes.status).toHaveBeenCalledWith(422);
+    expect(mockRes.json).toHaveBeenCalledWith({
+      success: false,
+      message: 'No deliverymen available, please change delivery hour or order later',
+    });
+  });
+
+
+
+});

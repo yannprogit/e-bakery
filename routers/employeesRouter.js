@@ -16,7 +16,7 @@ router.get('/managers', authMiddleware(['admin']), (req, res) => {
     employeesController.getEmployeesByRole(req, res, 5);
 });
 
-router.get('/cooks', authMiddleware(['admin', 'manager']), (req, res) => {
+router.get('/bakers', authMiddleware(['admin', 'manager']), (req, res) => {
     employeesController.getEmployeesByRole(req, res, 3);
 });
 

@@ -86,8 +86,12 @@ exports.updateEmployeeById = async (req, res, id, role) => {
             required: ['firstname', 'lastname', 'mail', 'password'],
           };
         const validateBody = ajv.validate(schema, req.body);
+        const format = /^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}:\d{2})?$/;
         if (!validateBody) {
             res.status(400).json({success: false, message: ajv.errors});
+        }
+        else if (req.body.endContract&&!format.test(req.body.endContract)) {
+            res.status(400).json({ success: false, message: 'endContract must be a valid date' });
         }
         else {
             const employee = await updateEmployeeByAdmin(req.params.id, req.body.firstname, req.body.lastname, req.body.mail, await bcrypt.hash(req.body.password, 10), req.body.endContract);
@@ -111,7 +115,7 @@ exports.updateEmployeeById = async (req, res, id, role) => {
         if (!validateBody) {
             res.status(400).json({success: false, message: ajv.errors});
         }
-        else if (!format.test(req.body.endContract)) {
+        else if (req.body.endContract&&!format.test(req.body.endContract)) {
             res.status(400).json({ success: false, message: 'endContract must be a valid date' });
         }
         else {
