@@ -1,6 +1,8 @@
 //------------- Import -------------
 const { getCustomers, getCustomerById, addCustomer, deleteCustomerById, updateCustomerByAdmin, updateCustomerByCustomer } = require('../services/customersService.js');
 const bcrypt = require('bcrypt');
+const Ajv = require('ajv');
+const ajv = new Ajv();
 
 //------------- Methods -------------
 //Get the list of customers
@@ -60,21 +62,57 @@ exports.updateCustomerById = async (req, res, id, role) => {
         res.status(404).json({success: false, message: "This customer doesn't exist"});
     }
     else if (role=="admin") {
-        const customer = await updateCustomerByAdmin(req.params.id, req.body.firstname, req.body.lastname, req.body.mail, await bcrypt.hash(req.body.password, 10), req.body.zipCode, req.body.address, req.body.town);
-        if (customer) {
-            res.status(204).send();
+        const schema = {
+            type: 'object',
+            properties: {
+              firstname: { type: 'string' },
+              lastname: { type: 'string' },
+              mail: { type: 'string' },
+              password: { type: 'string' },
+              zipCode: {type: 'integer' },
+              address: { type: 'string' },
+              town: { type: 'string' },
+            },
+            required: ['firstname', 'lastname', 'mail', 'password', 'zipCode', 'address', 'town'],
+          };
+        const validateBody = ajv.validate(schema, req.body);
+        if (!validateBody) {
+            res.status(400).json({success: false, message: ajv.errors});
         }
         else {
-            res.status(422).json({success: false, message: "This mail is already linked on an account"});
+            const customer = await updateCustomerByAdmin(req.params.id, req.body.firstname, req.body.lastname, req.body.mail, await bcrypt.hash(req.body.password, 10), req.body.zipCode, req.body.address, req.body.town);
+            if (customer) {
+                res.status(204).send();
+            }
+            else {
+                res.status(422).json({success: false, message: "This mail is already linked on an account"});
+            }
         }
     }
     else if (role=="customer"&&customer.id==id) {
-        const customer = await updateCustomerByCustomer(req.params.id, req.body.mail, await bcrypt.hash(req.body.password, 10), req.body.zipCode, req.body.address, req.body.town);
-        if (customer) {
-            res.status(204).send();
+        const schema = {
+            type: 'object',
+            properties: {
+              mail: { type: 'string' },
+              password: { type: 'string' },
+              zipCode: {type: 'integer' },
+              address: { type: 'string' },
+              town: { type: 'string' },
+            },
+            required: ['mail', 'password', 'zipCode', 'address', 'town'],
+          };
+        const validateBody = ajv.validate(schema, req.body);
+        if (!validateBody) {
+            res.status(400).json({success: false, message: ajv.errors});
         }
         else {
-            res.status(422).json({success: false, message: "This mail is already linked on an account"});
+            const customer = await updateCustomerByCustomer(req.params.id, req.body.mail, await bcrypt.hash(req.body.password, 10), req.body.zipCode, req.body.address, req.body.town);
+            if (customer) {
+                res.status(204).send();
+            }
+            else {
+                res.status(422).json({success: false, message: "This mail is already linked on an account"});
+            }
         }
     }
     else {
