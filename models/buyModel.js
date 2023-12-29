@@ -15,7 +15,7 @@ module.exports = (sequelize) => {
     },
     foodId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     deliverymanId: {
       type: DataTypes.INTEGER,
