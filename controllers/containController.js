@@ -1,6 +1,7 @@
 //------------- Import -------------
 const { getCompositions, addContain, getSpecificCompositions, replaceIngredientOfFood, deleteIngredientOfFood, deleteCompositionsOfFood, getContainByIds } = require('../services/containService.js');
 const { getFoodById } = require('../services/foodsService.js');
+const { getIngredientById } = require('../services/ingredientsService.js');
 
 //------------- Methods -------------
 //Get the list of compositions
@@ -16,8 +17,18 @@ exports.addContain = async (req, res) => {
         res.status(422).json({success: false, message: "This contain already exist"});
     }
     else {
-        await addContain(req.body.foodId, req.body.ingredientId);
-        res.status(201).json({success: true, contain: contain});
+        const food = await getFoodById(req.body.foodId);
+        const ingredient = await getIngredientById(req.body.ingredientId);
+        if (food==null) {
+            res.status(404).json({success: false, message: "This food doesn't exist"});
+        }
+        else if (ingredient==null) {
+            res.status(404).json({success: false, message: "This ingredient doesn't exist"});
+        }
+        else {
+            const contain = await addContain(req.body.foodId, req.body.ingredientId);
+            res.status(201).json({success: true, contain: contain});
+        }
     }
  }
 
