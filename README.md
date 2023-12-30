@@ -7,7 +7,7 @@ This api responds to the fact that we do not necessarily have a bakery nearby, a
 - Create an empty database named "e-bakery" on phpmyadmin or similar, the database will be automatically filled
 - run "npm install"
 - run "node server.js"
-- you can populate the database with the /populate-db route (you must post) (you will need to be logged in with an admin account to do this (mail: "yacowan.keebrady@gmail.com", password: "mdp")).
+- you can populate the database with the /populate-db route (you must post without body on this route) (you will need to be logged in with an admin account to do this (mail: "yacowan.keebrady@gmail.com", password: "mdp")).
 
 # How it works:
 - To order :
