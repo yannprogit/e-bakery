@@ -9,6 +9,21 @@ This api responds to the fact that we do not necessarily have a bakery nearby, a
 - run "node server.js"
 - you can populate the database with the /populate-db route (you must post without body on this route) (you will need to be logged in with an admin account to do this (mail: "yacowan.keebrady@gmail.com", password: "mdp")).
 
+# Ressources:
+- Customer: customers can order food, table: customers (id, firstname, lastname, mail, zipCode, address, town)
+
+- Employee : these are the employees who manage the bakery, they can have different roles (admin , manager, cashier, baker, deliveryman), table: employees (id, fistname, lastname, mail, role, endContract)
+
+- Food : food available in the bakery, table: foods (id, name, price, description, stock)
+
+- Ingredient : the ingredients used to make up the foods, table: ingredients (id, name, stock)
+
+- Contain: compositions linking foods to ingredients, table: contain (foodId, ingredientId)
+
+- Buy: customer purchases, table: buy (id, customerId, foodId, deliverymanId, qty, dueDate, deliveryDate, status, validation)
+
+Although there's a roles table that gives the employee roles, it cannot be get, add, update or delete, as it does not need to be modified, as the roles will always be the same.
+
 # How it works:
 - To order :
     The customer must first add a buy by specifying the desired foodId and qty. The buy will be added to the user's shopping cart, (the status of the buy will be "cart" in the database). At this point, the customer can delete the order as it has not yet been confirmed.
@@ -57,21 +72,6 @@ This api responds to the fact that we do not necessarily have a bakery nearby, a
             Contain table compositions link foods to ingredients. A baker can add, delete or modify an ingredient that makes up a food.
 
             The baker can delete either a contain or all the compositions of a food. 
-
-# Ressources:
-- Customer: customers can order food, table: customers (id, firstname, lastname, mail, zipCode, address, town)
-
-- Employee : these are the employees who manage the bakery, they can have different roles (admin , manager, cashier, baker, deliveryman), table: employees (id, fistname, lastname, mail, role, endContract)
-
-- Food : food available in the bakery, table: foods (id, name, price, description, stock)
-
-- Ingredient : the ingredients used to make up the foods, table: ingredients (id, name, stock)
-
-- Contain: compositions linking foods to ingredients, table: contain (foodId, ingredientId)
-
-- Buy: customer purchases, table: buy (id, customerId, foodId, deliverymanId, qty, dueDate, deliveryDate, status, validation)
-
-Although there's a roles table that gives the employee roles, it cannot be get, add, update or delete, as it does not need to be modified, as the roles will always be the same.
 
 # Postman collection: 
 requirements: the collection and environment "eBakeryEnvironment"
