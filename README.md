@@ -12,17 +12,17 @@ This api responds to the fact that we don't necessarily have a bakery nearby, an
 # How it works:
 
 # Ressources:
-- Customer : se sont les clients qui peuvent commander de la nourriture, table: customers (id, firstname, lastname, mail, zipCode, address, town)
+- Customer: customers can order food, table: customers (id, firstname, lastname, mail, zipCode, address, town)
 
-- Employee : se sont les employees qui gère la boulangerie, ils peuvent être de différents roles (admin , manager, cashier, baker, deliveryman), table: employees (id, fistname, lastname, mail, role, endContract)
+- Employee : these are the employees who manage the bakery, they can have different roles (admin , manager, cashier, baker, deliveryman), table: employees (id, fistname, lastname, mail, role, endContract)
 
-- Food : se sont les nourritures disponibles dans la boulangerie, table: foods (id, name, price, description, stock)
+- Food : food available in the bakery, table: foods (id, name, price, description, stock)
 
-- Ingredient : se sont les ingrédients qui servent à composer les nourritures, table: ingredients (id, name, stock)
+- Ingredient : the ingredients used to make up the foods, table: ingredients (id, name, stock)
 
-- Contain : se sont les compositions qui relient les foods aux ingredients, table: contain (foodId, ingredientId)
+- Contain: compositions linking foods to ingredients, table: contain (foodId, ingredientId)
 
-- Buy : se sont les achats des clients, table: buy (id, customerId, foodId, deliverymanId, qty, dueDate, deliveryDate, status, validation)
+- Buy: customer purchases, table: buy (id, customerId, foodId, deliverymanId, qty, dueDate, deliveryDate, status, validation)
 
 Although there's a roles table that gives the employee roles, it can't be get, add, update or delete, as it doesn't need to be modified, as the roles will always be the same.
 
