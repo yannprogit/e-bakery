@@ -1,10 +1,13 @@
 const { getFoods, addFood, getFoodById, deleteFoodById, updateFoodById } = require('../../controllers/foodsController.js');
 const { getFoods :getFoodsService , addFood: addFoodService, getFoodById: getFoodByIdService, deleteFoodById: deleteFoodByIdService, updateFoodByAdmin: updateFoodByAdminService, updatePrice:updatePriceService , updateFoodByBaker: updateFoodByBakerService } = require('../../services/foodsService.js');
 const foodsService = require('../../services/foodsService.js');
-
+const Ajv = require('ajv');
+const ajv = new Ajv();
 
 // Mock the necessary services
 jest.mock('../../services/foodsService.js');
+jest.mock('ajv');
+const mockAjv = new Ajv();
 
 
 describe('Foods Controller', () => {
@@ -12,91 +15,89 @@ describe('Foods Controller', () => {
     jest.clearAllMocks();
   });
 
-  describe('GET FOOD', () => {
+  describe('getFoods', () => {
+    it('should return foods and status 200', async () => {
+      const mockFoods = [
+        { id: '1', name: 'Food 1', description: 'Description 1' },
+        { id: '2', name: 'Food 2', description: 'Description 2' },
+      ];
 
-  it('should get the list of foods', async () => {
-    // Mock data for the request
-    const mockReq = {};
-  
-    // Mock data for the response
-    const mockFoods = [{ id: 1, name: 'Kebab', price: 10.99, description: 'Delicious kebab', stock: 20 }];
-  
-    // Mock the behavior of the getFoods service
-    getFoodsService.mockResolvedValue(mockFoods);
-  
-    // Mock Express response object
-    const mockRes = {
-      json: jest.fn(),
-    };
-  
-    // Call the getFoods method
-    await getFoods(mockReq, mockRes);
-  
-    // Verify that the response is as expected
-    expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: mockFoods });
-  });
+      // Mock the behavior of getFoods service
+      getFoodsService.mockResolvedValue(mockFoods);
 
-  describe('Foods Controller - Add Food', () => {
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-  
-    it('should add a food successfully', async () => {
-      // Mock data for the request
-      const mockReq = {
-        body: {
-          name: 'Pizza',
-          price: 10.99,
-          description: 'Delicious pizza',
-          stock: 20,
-        },
-      };
-  
-      // Mock data for the response
-      const mockFood = { id: 1, name: 'Pizza', price: 10.99, description: 'Delicious pizza', stock: 20 };
-  
-      // Mock the behavior of the addFood service
-      addFoodService.mockResolvedValue(mockFood);
-  
       // Mock Express response object
       const mockRes = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
       };
-  
-      // Call the addFood method
+
+      // Call the getFoods controller function
+      await getFoods({}, mockRes);
+
+      // Expectations
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: mockFoods });
+    });
+
+  });
+
+  describe('addFood', () => {
+    it('should add food and return status 201', async () => {
+      const mockFood = { id: '1', name: 'New Food', price: 10.99, description: 'New Description', stock: 5 };
+
+      // Mock the behavior of addFood service
+      addFoodService.mockResolvedValue(mockFood);
+
+      // Mock Express request and response objects
+      const mockReq = {
+        body: {
+          name: 'New Food',
+          price: 10.99,
+          description: 'New Description',
+          stock: 5,
+        },
+      };
+
+      const mockRes = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+
+      // Call the addFood controller function
       await addFood(mockReq, mockRes);
-  
-      // Verify that the response status and JSON are as expected
+
+      // Expectations
       expect(mockRes.status).toHaveBeenCalledWith(201);
       expect(mockRes.json).toHaveBeenCalledWith({ success: true, food: mockFood });
     });
-  
-    it('should handle error when creating a food', async () => {
-      // Mock data for the request
+
+    it('should handle an error and return status 400 with an error message', async () => {
+      const errorMessage = 'The stock must be over 0';
+
+      // Mock the behavior of addFood service to simulate an error
+      addFoodService.mockResolvedValue(null);
+
+      // Mock Express request and response objects
       const mockReq = {
         body: {
-          // Provide incomplete or incorrect data to simulate an error
-          name: 'Pizza',
+          name: 'New Food',
           price: 10.99,
+          description: 'New Description',
+          stock: 0, // Stock less than or equal to 0 to trigger the error case
         },
       };
-  
-      // Mock the behavior of the addFood service when an error occurs
-      addFoodService.mockResolvedValue(null);
-  
-      // Mock Express response object
+
       const mockRes = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
       };
-  
-      // Call the addFood method
+
+      // Call the addFood controller function
       await addFood(mockReq, mockRes);
-  
-      // Verify that the response status and JSON are as expected for an error
-      expect(mockRes.status).toHaveBeenCalledWith(404);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: false, message: 'Error when creating this food, verify your args' });
+
+      // Expectations
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({ success: false, message: errorMessage });
     });
   });
 
@@ -244,5 +245,78 @@ describe('Foods Controller', () => {
       expect(res.json).toHaveBeenCalledWith({ success: false, message: "This food is still being delivered" });
   });
   });
+
+
+  describe('updateFoodById', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+  
+    it('should return 404 if food does not exist', async () => {
+      // Arrange
+      const mockReq = {
+        params: { id: 'foodId123' },
+      };
+      const mockRes = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+  
+      // Mock the behavior of getFoodById service
+      getFoodByIdService.mockResolvedValue(null);
+  
+      // Act
+      await updateFoodById(mockReq, mockRes, 'admin');
+  
+      // Assert
+      expect(mockRes.status).toHaveBeenCalledWith(404);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
+        message: "This food doesn't exist",
+      });
+    });
+
+
+    describe('updateFoodById', () => {
+      it('should return 400 if request body is invalid', async () => {
+        // Arrange
+        const invalidRequestBody = {
+          name: 'Updated Food',
+          price: 'not_a_number', // Invalid data type for price
+          description: 'Updated description',
+        };
+  
+        const mockReq = {
+          params: { id: 'foodId123' },
+          body: invalidRequestBody,
+        };
+  
+        const mockRes = {
+          status: jest.fn().mockReturnThis(),
+          json: jest.fn(),
+        };
+  
+        // Mock the behavior of getFoodById
+        getFoodByIdService.mockResolvedValue({ id: 'foodId123' });
+  
+        // Mock the behavior of Ajv validation
+        mockAjv.validate.mockReturnValue(false);
+        mockAjv.errors = [{ message: 'Invalid data type' }];
+  
+        // Act
+        await updateFoodById(mockReq, mockRes, 'admin');
+  
+        // Assert
+        expect(getFoodByIdService).toHaveBeenCalledWith('foodId123');
+        expect(mockAjv.validate).toHaveBeenCalledWith(expect.any(Object), invalidRequestBody);
+        expect(mockRes.status).toHaveBeenCalledWith(400);
+        expect(mockRes.json).toHaveBeenCalledWith({
+          success: false,
+          message: mockAjv.errors,
+        });
+      });
+  
+    });
+  });
 });
-});
+

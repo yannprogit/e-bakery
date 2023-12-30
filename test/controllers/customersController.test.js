@@ -1,11 +1,19 @@
 // Import required modules and the controller (functions)
 const { getCustomers,addCustomer, getCustomerById, updateCustomerById, updateCustomerByAdmin, updateCustomerByCustomer, deleteCustomerById} = require('../../controllers/customersController');
 const { getCustomerById: getCustomerByIdService, addCustomer: addCustomerService , getCustomers: getCustomersService, updateCustomerById: updateCustomerByIdService, updateCustomerByAdmin: updateCustomerByAdminService, updateCustomerByCustomer: updateCustomerByCustomerService, deleteCustomerById: deleteCustomerByIdService} = require('../../services/customersService');
+const { getFoodById } = require('../../controllers/foodsController');
+const { getFoodById : getFoodByIdService} = require('../../services/foodsService');
+
+
 const bcrypt = require('bcrypt');
+const Ajv = require('ajv');
+const ajv = new Ajv();
 
 // Mocking the services
+jest.mock('ajv');
 jest.mock('../../services/customersService');
 jest.mock('bcrypt');
+const mockAjv = new Ajv();
 
 ///////////////// GLOBAL CUSTOMERS ////////////////
 describe('Customers Controller', () => {
@@ -364,6 +372,82 @@ describe('Customers Controller', () => {
 
     ////// UPDATE A CUSTOMER ///////
     describe('updateCustomerById', () => {
+
+      it('should return 404 if the customer does not exist', async () => {
+        // Arrange
+        const mockReq = {
+          params: { id: 'customerId123' },
+        };
+        const mockRes = {
+          status: jest.fn().mockReturnThis(),
+          json: jest.fn(),
+        };
+    
+        // Mock the behavior of getCustomerById
+        getCustomerByIdService.mockResolvedValue(null);
+    
+        // Act
+        await updateCustomerById(mockReq, mockRes);
+    
+        // Assert
+        expect(mockRes.status).toHaveBeenCalledWith(404);
+        expect(mockRes.json).toHaveBeenCalledWith({
+          success: false,
+          message: "This customer doesn't exist",
+        });
+      });
+    
+      it('should return 400 if request body does not match the schema', async () => {
+        // Arrange
+        const mockReq = {
+          params: { id: 'customerId123' },
+          body: {
+            firstname: 'Jeff',
+            lastname: 'Jeff',
+            mail: 'Jeff',
+            password: 'Jeff',
+            zipCode: 'Jeff',
+            address: 'Jeff',
+            town: 'Jeff',
+          },
+        };
+        const mockRes = {
+          status: jest.fn().mockReturnThis(),
+          json: jest.fn(),
+        };
+      
+        // Mock the behavior of getCustomerById
+        getCustomerByIdService.mockResolvedValue('customerId123');
+      
+        // Create a new instance of Ajv
+        mockAjv.validate.mockReturnValue(false);
+        mockAjv.errors = undefined;
+          // Mock the behavior of AJV
+          mockAjv.validate.mockReturnValue(false);
+        // Act
+        await updateCustomerById(mockReq, mockRes, 'customerId123', 'admin');
+      
+        // Assert
+        expect(mockRes.status).toHaveBeenCalledWith(400);
+        expect(mockRes.json).toHaveBeenCalledWith({
+          success: false,
+          message: mockAjv.errors,
+        });
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
       it('should update a customer by admin - status: 204', async () => {
         // Arrange
         const mockReq = {

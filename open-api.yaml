@@ -313,7 +313,106 @@ paths:
           $ref: '#/components/responses/accessForbidden'
         '422':
           $ref: "#/components/responses/errorProcess"
-     
+
+  /employees/managers:
+    get:
+      tags:
+        - Employees 
+      summary: Get all the managers
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+      description: Return an array of managers
+      operationId: getManagers
+      responses:
+        '200':
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Manager'
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'   
+  /employees/cashiers:
+    get:
+      tags:
+        - Employees 
+      summary: Get all the cashiers
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - manager
+      description: Return an array of cashiers
+      operationId: getCashiers
+      responses:
+        '200':
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cashier'
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden' 
+  /employees/deliverymen:
+    get:
+      tags:
+        - Employees 
+      summary: Get all the deliverymen
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - manager
+      description: Return an array of deliverymen
+      operationId: getDeliverymen
+      responses:
+        '200':
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Deliveryman'
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'   
+  /employees/bakers:
+    get:
+      tags:
+        - Employees 
+      summary: Get all the bakers
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - manager
+      description: Return an array of bakers
+      operationId: getBakers
+      responses:
+        '200':
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Baker'
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'  
             
   /foods:
     get:
@@ -1014,6 +1113,7 @@ components:
                 example: "Croissant"
               price:
                 type: number
+                minimum: 0.00
                 example: 2.5
               description:
                 type: string
@@ -1059,8 +1159,8 @@ components:
           schema:
             type: object
             required:
+            - foodId
             - ingredientId
-            - newIngredientId
             properties:
               foodId:
                 type: integer
@@ -1325,7 +1425,118 @@ components:
           type: string
           format: date
           example: null
-          
+    Manager:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        firstname:
+          type: string
+          example: "Hamp"
+        lastname:
+          type: string
+          example: "Loyé"
+        mail:
+          type: string
+          pattern: '^[\w\.-]+@[\w\.-]+\.\w+$'
+          example: "hamp.loye@gmail.com"
+        role:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 5
+        password:
+          type: string
+          example: "mdp"
+        endContract:
+          type: string
+          format: date
+          example: null
+    Cashier:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        firstname:
+          type: string
+          example: "Hamp"
+        lastname:
+          type: string
+          example: "Loyé"
+        mail:
+          type: string
+          pattern: '^[\w\.-]+@[\w\.-]+\.\w+$'
+          example: "hamp.loye@gmail.com"
+        role:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 4
+        password:
+          type: string
+          example: "mdp"
+        endContract:
+          type: string
+          format: date
+          example: null
+    Baker:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        firstname:
+          type: string
+          example: "Hamp"
+        lastname:
+          type: string
+          example: "Loyé"
+        mail:
+          type: string
+          pattern: '^[\w\.-]+@[\w\.-]+\.\w+$'
+          example: "hamp.loye@gmail.com"
+        role:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 3
+        password:
+          type: string
+          example: "mdp"
+        endContract:
+          type: string
+          format: date
+          example: null
+    Deliveryman:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        firstname:
+          type: string
+          example: "Hamp"
+        lastname:
+          type: string
+          example: "Loyé"
+        mail:
+          type: string
+          pattern: '^[\w\.-]+@[\w\.-]+\.\w+$'
+          example: "hamp.loye@gmail.com"
+        role:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 2
+        password:
+          type: string
+          example: "mdp"
+        endContract:
+          type: string
+          format: date
+          example: null
           
     foodsList:
       type: array

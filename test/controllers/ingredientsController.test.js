@@ -1,6 +1,6 @@
 
-const {getIngredients, addIngredient, getIngredientById, deleteIngredientById} = require('../../controllers/ingredientsController.js');
-const {getIngredients: getIngredientsService, addIngredient: addIngredientService, getIngredientById: getIngredientByIdService, deleteIngredientById: deleteIngredientByIdService} = require('../../services/ingredientsService.js');
+const {getIngredients, addIngredient, getIngredientById, deleteIngredientById, updateIngredientById } = require('../../controllers/ingredientsController.js');
+const {getIngredients: getIngredientsService, addIngredient: addIngredientService, getIngredientById: getIngredientByIdService, deleteIngredientById: deleteIngredientByIdService, updateIngredientById : updateIngredientByIdService} = require('../../services/ingredientsService.js');
   
   
   jest.mock('../../services/ingredientsService.js');
@@ -11,78 +11,89 @@ const {getIngredients: getIngredientsService, addIngredient: addIngredientServic
     });
   
     describe('INGREDIENTS', () => {
-        describe('Ingredients Controller - Get Ingredients', () => {
-            it('should return a list of ingredients with a 200 status code', async () => {
-              // Mock data for the ingredients
-              const mockIngredients = [
-                { id: 1, name: 'Salt', description: 'Common table salt' },
-                { id: 2, name: 'Sugar', description: 'Granulated sugar' },
-              ];
-          
-              // Mock the behavior of the getIngredientsService function
-              getIngredientsService.mockResolvedValue(mockIngredients);
-          
-              // Mock Express response object
-              const mockRes = {
-                json: jest.fn(),
-              };
-          
-              // Call the getIngredients method
-              await getIngredients({}, mockRes);
-          
-              // Verify that the response JSON and status are as expected
-              expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: mockIngredients });
-            });
-          });
+      describe('getIngredients', () => {
+        it('should return a list of ingredients with status 200', async () => {
+          // Arrange
+          const mockReq = {};
+          const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+          };
+    
+          // Mock the behavior of getIngredientsService
+          const mockIngredientsData = [
+            { id: 'ingredientId1', name: 'Ingredient 1' },
+            { id: 'ingredientId2', name: 'Ingredient 2' },
+          ];
+          getIngredientsService.mockResolvedValue(mockIngredientsData);
+    
+          // Act
+          await getIngredients(mockReq, mockRes);
+    
+          // Assert
+          expect(getIngredientsService).toHaveBeenCalled();
+          expect(mockRes.status).toHaveBeenCalledWith(200);
+          expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: mockIngredientsData });
+        });
+      });
     });
+    
   
     describe('addIngredient', () => {
-      it('should add an ingredient and return 201 status', async () => {
-        const req = {
+      it('should add an ingredient and return it with status 201', async () => {
+        // Arrange
+        const mockReq = {
           body: {
-            name: 'NewIngredient',
-            stock: 20
-          }
+            name: 'New Ingredient',
+            stock: 10,
+          },
         };
-        const res = {
+        const mockRes = {
           status: jest.fn().mockReturnThis(),
-          json: jest.fn()
+          json: jest.fn(),
         };
   
-        const mockIngredient = {
-          id: 3,
-          name: 'NewIngredient',
-          stock: 20
-        };
+        // Mock the behavior of addIngredientService
+        const mockAddedIngredient = { id: 'newIngredientId', name: 'New Ingredient', stock: 10 };
+        addIngredientService.mockResolvedValue(mockAddedIngredient);
   
-        addIngredientService.mockResolvedValue(mockIngredient);
+        // Act
+        await addIngredient(mockReq, mockRes);
   
-        await addIngredient(req, res);
-  
-        expect(res.status).toHaveBeenCalledWith(201);
-        expect(res.json).toHaveBeenCalledWith({ success: true, ingredient: mockIngredient });
+        // Assert
+        expect(addIngredientService).toHaveBeenCalledWith('New Ingredient', 10);
+        expect(mockRes.status).toHaveBeenCalledWith(201);
+        expect(mockRes.json).toHaveBeenCalledWith({ success: true, ingredient: mockAddedIngredient });
       });
   
-      it('should return 404 status when there is an error creating the ingredient', async () => {
-        const req = {
-          body: {
-            name: 'InvalidIngredient',
-            stock: 30
-          }
+      it('should return 400 if stock is not over 0', async () => {
+        const mockReq = {
+            body: {
+                name: 'Salt',
+                stock: 0, // Stock is set to 0, which is not allowed
+            },
         };
-        const res = {
-          status: jest.fn().mockReturnThis(),
-          json: jest.fn()
+    
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
         };
-  
-        addIngredientService.mockResolvedValue(null);
-  
-        await addIngredient(req, res);
-  
-        expect(res.status).toHaveBeenCalledWith(404);
-        expect(res.json).toHaveBeenCalledWith({ success: false, message: 'Error when creating this ingredient, verify your args' });
-      });
+    
+        addIngredientService.mockResolvedValue(null); // Simulate that addIngredient returns null
+    
+        // Act
+        await addIngredient(mockReq, mockRes);
+    
+        // Assert
+        expect(mockRes.status).toHaveBeenCalledWith(400);
+        expect(mockRes.json).toHaveBeenCalledWith({
+            success: false,
+            message: "The stock must be over 0",
+        });
     });
+
+    });
+  
   
     describe('getIngredientById', () => {
       it('should return an ingredient by ID', async () => {
@@ -166,4 +177,93 @@ const {getIngredients: getIngredientsService, addIngredient: addIngredientServic
         expect(res.json).toHaveBeenCalledWith({ success: false, message: "This ingredient doesn't exist" });
       });
     });
+
+
+    describe('updateIngredientById', () => {
+
+      it('should return 404 if ingredient does not exist', async () => {
+        const mockReq = {
+            params: { id: 'ingredientId123' },
+        };
+    
+        const mockRes = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn(),
+        };
+    
+        // Mock the behavior of getIngredientById
+        getIngredientByIdService.mockResolvedValue(null); // Simulate that getIngredientById returns null
+    
+        // Act
+        await updateIngredientById(mockReq, mockRes);
+    
+        // Assert
+        expect(mockRes.status).toHaveBeenCalledWith(404);
+        expect(mockRes.json).toHaveBeenCalledWith({
+            success: false,
+            message: "This ingredient doesn't exist",
+        });
+    });
+
+    it('should return 400 if the addition of stock is not over 0', async () => {
+      const mockReq = {
+          params: { id: 'ingredientId123' },
+          body: {
+              name: 'New Ingredient Name',
+              addStock: 0, // Set to a value not over 0 for testing
+          },
+      };
+  
+      const mockRes = {
+          status: jest.fn().mockReturnThis(),
+          json: jest.fn(),
+      };
+  
+      // Mock the behavior of getIngredientById
+      getIngredientByIdService.mockResolvedValue({ id: 'ingredientId123', name: 'Existing Ingredient', stock: 10 });
+  
+      // Mock the behavior of updateIngredientById to simulate failure
+      updateIngredientByIdService.mockResolvedValue(false);
+  
+      // Act
+      await updateIngredientById(mockReq, mockRes);
+  
+      // Assert
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith({
+          success: false,
+          message: "The addition of stock must be over 0",
+      });
   });
+
+
+  it('should return 204 if the ingredient is updated successfully', async () => {
+    const mockReq = {
+        params: { id: 'ingredientId123' },
+        body: {
+            name: 'New Ingredient Name',
+            addStock: 5, // Set to a valid value for testing
+        },
+    };
+
+    const mockRes = {
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn(),
+    };
+
+    // Mock the behavior of getIngredientById
+    getIngredientByIdService.mockResolvedValue({ id: 'ingredientId123', name: 'Existing Ingredient', stock: 10 });
+
+    // Mock the behavior of updateIngredientById to simulate success
+    updateIngredientByIdService.mockResolvedValue(true);
+
+    // Act
+    await updateIngredientById(mockReq, mockRes);
+
+    // Assert
+    expect(mockRes.status).toHaveBeenCalledWith(204);
+    expect(mockRes.send).toHaveBeenCalled();
+});
+  
+  });
+});
