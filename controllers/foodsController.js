@@ -19,7 +19,7 @@ exports.addFood = async (req, res) => {
     else {
         res.status(400).json({success: false, message: "The stock must be over 0"});
     }
- }
+}
 
 //Get a food
 exports.getFoodById = async (req, res) => {
