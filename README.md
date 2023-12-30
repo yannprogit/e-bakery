@@ -43,7 +43,7 @@ All the world's can get foods and compositions (contain's table)
         - add a buy
         - get its buy
         - update its buy (status and validation)
-        - delete buy (if the status is "cart")
+        - delete its buy (if the status is "cart")
     - /customers:
         - get its account
         - update its account
