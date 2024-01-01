@@ -1,73 +1,65 @@
-// Import required modules and the controller (functions)
-const { getEmployees, getEmployeesByRole, addEmployee, deleteEmployeeById, getEmployeeById, updateEndContract, updateEmployeeByAdmin} = require('../../controllers/employeesController');
-const { getEmployees : getEmployeesService, getEmployeesByRole : getEmployeesByRoleService, addEmployee : addEmployeeService, deleteEmployeeById : deleteEmployeeByIdService, getEmployeeById : getEmployeeByIdService, updateEndContract : updateEndContractService, updateEmployeeByAdmin : updateEmployeeByAdminService} = require('../../services/employeesService');
+///////////////// IMPORT ALL THE FUNCTIONS ////////////////
+const { getEmployees, getEmployeesByRole, addEmployee, deleteEmployeeById, getEmployeeById, updateEmployeeById} = require('../../controllers/employeesController');
+const { getEmployees : getEmployeesService, getEmployeesByRole : getEmployeesByRoleService, addEmployee : addEmployeeService, deleteEmployeeById : deleteEmployeeByIdService, getEmployeeById : getEmployeeByIdService, updateEndContract : updateEndContractService, updateEmployeeByAdmin : updateEmployeeByAdminService, updateEmployeeByEmployee : updateEmployeeByEmployeeService} = require('../../services/employeesService');
 const bcrypt = require('bcrypt');
 
+///////////////// MOCKING THE SERVICES ////////////////
 jest.mock('../../services/employeesService');
 jest.mock('bcrypt');
 
-
+///////////////// GLOBAL EMPLOYEE CONTROLLER ////////////////
 describe('Employees Controller', () => {
-    
+
+    ///////////////// GET EMPLOYEES ////////////////
     describe(' Get /employees ', () => {
         it('should get the list of employees', async () => {
-            // Mock data for the list of employees
             const mockEmployees = [
-                { id: 1, firstname: 'John', lastname: 'Doe', mail: 'rdgbhrg@gmail.com', password: 'fsefsef51fsef', role : 'boulangaire', endContract : '12/11/2055' },
-                { id: 1, firstname: 'John', lastname: 'Doe', mail: 'rdgbhrg@gmail.com', password: 'fsefsef51fsef', role : 'yes', endContract : '12/11/2055' }
+                { id: 1, firstname: 'John', lastname: 'Doe', mail: 'rdgbhrg@gmail.com', password: 'fsefsef51fsef', role : 4, endContract : '12/11/2055' },
+                { id: 1, firstname: 'GREZ', lastname: 'DRG', mail: 'GREZG@gmail.com', password: 'fsefsef51fsef', role : 2, endContract : '12/11/2055' }
             ];
 
-            // Mock the behavior of getEmployees service
             getEmployeesService.mockResolvedValue(mockEmployees);
 
-            // Mock Express response object
             const mockRes = {
                 status: jest.fn().mockReturnThis(),
                 json: jest.fn(),
             };
 
-            // Call the getEmployees method
             await getEmployees({}, mockRes);
 
-            // Verify that the response is as expected
             expect(mockRes.status).toHaveBeenCalledWith(200);
             expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: mockEmployees });
         });
     });
     
     
-
+    ///////////////// GET EMPLOYEES BY ROLE ////////////////
     describe('getEmployeesByRole', () => {
         it('should get the list of employees by their role', async () => {
-          // Mock data for the request
           const mockReq = {
             params: { id: 1 },
           };
-      
-          // Mock data for the response
+
           const mockEmployees = [
-            { id: 1, name: 'John Doe', role: 'Engineer' },
-            { id: 2, name: 'Jane Smith', role: 'Manager' },
+            { id: 1, name: 'John Doe', role: 3 },
+            { id: 2, name: 'Jane Smith', role: 5 },
           ];
-      
-          // Mock the behavior of the getEmployeesByRole service
+
           getEmployeesByRoleService.mockResolvedValue(mockEmployees);
-      
-          // Mock Express response object
+
           const mockRes = {
             status: jest.fn().mockReturnThis(),
             json: jest.fn(),
           };
-      
-          // Call the getEmployeesByRole method
+
           await getEmployeesByRole(mockReq, mockRes);
-      
-          // Verify that the response is as expected
+
           expect(mockRes.status).toHaveBeenCalledWith(200);
           expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: mockEmployees });
         });
       });
 
+      ///////////////// GET EMPLOYEE BY ID ////////////////
       describe('getEmployeeById', () => {
         afterEach(() => {
             jest.clearAllMocks();
@@ -85,16 +77,14 @@ describe('Employees Controller', () => {
               json: jest.fn(),
           };
       
-          // Mock getEmployeeById function
           getEmployeeByIdService.mockResolvedValue({
               id: 1,
               name: 'John Doe',
               role: 'employee',
           });
       
-          await getEmployeeById(req, res, 1, 'admin'); // Pass the admin's ID as the third argument
+          await getEmployeeById(req, res, 1, 'admin');
       
-          // Assertions
           expect(res.status).toHaveBeenCalledWith(200);
           expect(res.json).toHaveBeenCalledWith({ success: true, data: expect.any(Object) });
       });
@@ -111,12 +101,9 @@ describe('Employees Controller', () => {
                 json: jest.fn(),
             };
     
-            // Mock getEmployeeById function to simulate a non-existent employee
             getEmployeeByIdService.mockResolvedValue(null);
     
             await getEmployeeById(req, res, 'admin');
-    
-            // Assertions
             expect(res.status).toHaveBeenCalledWith(404);
             expect(res.json).toHaveBeenCalledWith({ success: false, message: "This employee doesn't exist" });
         });
@@ -132,15 +119,13 @@ describe('Employees Controller', () => {
                 status: jest.fn().mockReturnThis(),
                 json: jest.fn(),
             };
-    
-            // Mock getEmployeeById function to simulate an existing employee
+
             getEmployeeByIdService.mockResolvedValue({
                 id: 'employeeId123',
                 name: 'John Doe',
                 role: 'employee',
             });
-    
-            // Attempt unauthorized access (e.g., manager accessing another employee's data)
+
             await getEmployeeById(req, res, 'otherEmployeeId', 'manager');
     
             // Assertions
@@ -150,7 +135,7 @@ describe('Employees Controller', () => {
     });
 
 
-
+        ///////////////// ADD EMPLOYEE ////////////////
       describe('addEmployee', () => {
             afterEach(() => {
                 jest.clearAllMocks();
@@ -183,7 +168,6 @@ describe('Employees Controller', () => {
 
                 await addEmployee(req, res, 'manager');
 
-                // Assertions
                 expect(res.status).toHaveBeenCalledWith(201);
                 expect(res.json).toHaveBeenCalledWith({ success: true, data: expect.any(Object) });
             });
@@ -195,7 +179,7 @@ describe('Employees Controller', () => {
                         lastname: 'User',
                         mail: 'admin@example.com',
                         password: 'admin123',
-                        role: 1, // Admin role
+                        role: 1,
                     },
                 };
 
@@ -206,7 +190,6 @@ describe('Employees Controller', () => {
 
                 await addEmployee(req, res, 'manager');
 
-                // Assertions
                 expect(res.status).toHaveBeenCalledWith(422);
                 expect(res.json).toHaveBeenCalledWith({ success: false, message: 'You cannot create an admin account' });
             });
@@ -218,7 +201,7 @@ describe('Employees Controller', () => {
                         lastname: 'User',
                         mail: 'duplicate@example.com',
                         password: 'duplicate123',
-                        role: 2, // Assuming role 2 is a regular employee
+                        role: 2,
                     },
                 };
 
@@ -228,11 +211,10 @@ describe('Employees Controller', () => {
                 };
 
                 bcrypt.hash.mockResolvedValue('hashedPassword');
-                addEmployeeService.mockResolvedValue(null); // Simulate existing email
+                addEmployeeService.mockResolvedValue(null); 
 
                 await addEmployee(req, res, 'manager');
 
-                // Assertions
                 expect(res.status).toHaveBeenCalledWith(422);
                 expect(res.json).toHaveBeenCalledWith({ success: false, message: 'This mail is already linked on an account' });
             });
@@ -240,7 +222,7 @@ describe('Employees Controller', () => {
 
 
 
-
+        ///////////////// DELETE EMPLOYEE ////////////////
         describe('deleteEmployeeById', () => {
           afterEach(() => {
               jest.clearAllMocks();
@@ -259,19 +241,16 @@ describe('Employees Controller', () => {
                   send: jest.fn(),
               };
       
-              // Mock getEmployeeById function to simulate an existing employee
               getEmployeeByIdService.mockResolvedValue({
                   id: 'employeeId123',
                   name: 'John Doe',
                   role: 'employee',
               });
-      
-              // Mock deleteEmployeeById function to simulate successful deletion
+
               deleteEmployeeByIdService.mockResolvedValue(true);
       
               await deleteEmployeeById(req, res, 'admin');
-      
-              // Assertions
+
               expect(res.status).toHaveBeenCalledWith(204);
               expect(res.send).toHaveBeenCalled();
           });
@@ -288,13 +267,11 @@ describe('Employees Controller', () => {
                   json: jest.fn(),
                   send: jest.fn(),
               };
-      
-              // Mock getEmployeeById function to simulate a non-existent employee
+
               getEmployeeByIdService.mockResolvedValue(null);
       
               await deleteEmployeeById(req, res, 'admin');
-      
-              // Assertions
+
               expect(res.status).toHaveBeenCalledWith(404);
               expect(res.json).toHaveBeenCalledWith({ success: false, message: "This employee doesn't exist" });
           });
@@ -311,19 +288,15 @@ describe('Employees Controller', () => {
                 json: jest.fn(),
                 send: jest.fn(),
             };
-        
-            // Mock getEmployeeById function to simulate an existing employee (manager)
+
             getEmployeeByIdService.mockResolvedValue({
                 id: 'employeeId123',
                 name: 'Manager Doe',
-                role: 1, // Assuming role number for manager is 1
+                role: 1,
             });
-        
-            // Mock deleteEmployeeById function (not needed for this specific test)
         
             await deleteEmployeeById(req, res, 'otherManagerId', 'manager');
         
-            // Assertions
             expect(res.status).toHaveBeenCalledWith(403);
             expect(res.json).toHaveBeenCalledWith({ success: false, message: "Access forbidden: You cannot delete another manager's account or admin's account" });
         });
@@ -342,21 +315,414 @@ describe('Employees Controller', () => {
                 send: jest.fn(),
             };
 
-            // Mock getEmployeeById function to simulate an existing employee
             getEmployeeByIdService.mockResolvedValue({
                 id: 'employeeId123',
                 name: 'John Doe',
                 role: 'employee',
             });
 
-            // Mock deleteEmployeeById function to simulate unfinished deliveries
             deleteEmployeeByIdService.mockResolvedValue(false);
 
             await deleteEmployeeById(req, res, 'admin');
 
-            // Assertions
             expect(res.status).toHaveBeenCalledWith(422);
             expect(res.json).toHaveBeenCalledWith({ success: false, message: "This deliveryman has unfinished deliveries" });
         });
-      });
+    });
+
+    ///////////////// UPDATE AN EMPLOYEE //////////////////
+    describe('updateEmployeeById', () => {
+        it('should update an employee by admin successfully', async () => {
+            const req = {
+                params: {
+                    id: 1,
+                },
+                body: {
+                    firstname: 'Emplo',
+                    lastname: 'Yee',
+                    mail: 'employee@example.com',
+                    password: 'password'
+                },
+            };
+    
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
+    
+            getEmployeeByIdService.mockResolvedValueOnce({
+                id: 1
+            });
+    
+            updateEmployeeByAdminService.mockResolvedValueOnce({});
+
+            await updateEmployeeById(req, res, 1, 'admin');
+    
+            expect(res.status).toHaveBeenCalledWith(204); 
+            expect(res.json).not.toHaveBeenCalled();
+            expect(res.send).toHaveBeenCalled();
+        });
+
+        it('should update a employee by employee successfully', async () => {
+            const req = {
+                params: {
+                    id: 1,
+                },
+                body: {
+                    mail: 'employee@example.com',
+                    password: 'password',
+                },
+            };
+    
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
+
+            getEmployeeByIdService.mockResolvedValueOnce({
+                id: 1,
+            });
+
+            updateEmployeeByEmployeeService.mockResolvedValueOnce({});
+    
+            await updateEmployeeById(req, res, 1, 'employee');
+    
+            expect(res.status).toHaveBeenCalledWith(204);
+            expect(res.json).not.toHaveBeenCalled();
+            expect(res.send).toHaveBeenCalled();
+        });
+
+        it('should update employee endContract by manager successfully', async () => {
+            const req = {
+                params: {
+                    id: 1,
+                },
+                body: {
+                    endContract: '2024-12-31',
+                },
+            };
+    
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
+    
+            getEmployeeByIdService.mockResolvedValueOnce(1);
+    
+            updateEndContractService.mockResolvedValueOnce({});
+    
+            await updateEmployeeById(req, res, 1, 'manager');
+    
+            expect(res.status).toHaveBeenCalledWith(204);
+            expect(res.json).not.toHaveBeenCalled();
+            expect(res.send).toHaveBeenCalled();
+        });
+
+        it('should handle invalid endContract date with 400 status', async () => {
+            const req = {
+                params: {
+                    id: 1,
+                },
+                body: {
+                    endContract: 'invalid_date',
+                },
+            };
+    
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
+    
+            getEmployeeByIdService.mockResolvedValueOnce(1);
+    
+            await updateEmployeeById(req, res, 1, 'manager');
+    
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: 'endContract must be a valid date',
+            });
+            expect(res.send).not.toHaveBeenCalled();
+        });
+
+        it('should handle forbidden access for manager updating another manager or admin account', async () => {
+            const req = {
+                params: {
+                    id: 2, 
+                },
+                body: {
+                    endContract: '2024-12-31',
+                },
+            };
+    
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
+    
+            const managerMock = {
+                id: 1,
+                role: 5,
+            };
+    
+            getEmployeeByIdService.mockResolvedValueOnce(managerMock);
+    
+            await updateEmployeeById(req, res, 1, 'manager');
+    
+            expect(res.status).toHaveBeenCalledWith(403);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: 'Access forbidden: You cannot modify the account of an admin or another manager',
+            });
+            expect(res.send).not.toHaveBeenCalled();
+        });
+
+        it('should handle updating with a past endContract date with 422 status', async () => {
+            const req = {
+                params: {
+                    id: 1,
+                },
+                body: {
+                    endContract: '2022-01-01',
+                },
+            };
+    
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
+    
+            getEmployeeByIdService.mockResolvedValueOnce(1);
+    
+            await updateEmployeeById(req, res, 1, 'manager');
+    
+            expect(res.status).toHaveBeenCalledWith(422);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: 'This date has passed',
+            });
+            expect(res.send).not.toHaveBeenCalled();
+        });
+
+        it('should handle scheduled deliveries after new contract end date with 422 status', async () => {
+            const req = {
+                params: {
+                    id: 3,
+                },
+                body: {
+                    endContract: '2024-12-01'
+                },
+            };
+    
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
+    
+            getEmployeeByIdService.mockResolvedValueOnce(1);
+    
+            //Mocking updateEndContract to directly return false
+            updateEndContractService.mockResolvedValueOnce(false);
+    
+            await updateEmployeeById(req, res, 1, 'manager');
+    
+            expect(res.status).toHaveBeenCalledWith(422);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: 'Deliveries are scheduled after the new contract end date',
+            });
+            expect(res.send).not.toHaveBeenCalled();
+        });
+
+        it('should handle updating an account that does not belong to the employee with 403 status', async () => {
+            const req = {
+                params: {
+                    id: 2, 
+                },
+                body: {
+                    mail: 'employee@example.com',
+                    password: 'password',                    
+                },
+            };
+    
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
+    
+            getEmployeeByIdService.mockResolvedValueOnce(1);
+    
+            await updateEmployeeById(req, res, 1, 'employee');
+    
+            expect(res.status).toHaveBeenCalledWith(403);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: 'Access forbidden: You cannot modify an account that does not belong to you',
+            });
+            expect(res.send).not.toHaveBeenCalled();
+        });
+
+        it('should return 422 status when updating employee with duplicate email by admin', async () => {
+            const req = {
+                params: {
+                    id: 1,
+                },
+                body: {
+                    firstname: 'Emplo',
+                    lastname: 'Yee',
+                    mail: 'duplicate@example.com',
+                    password: 'password'
+                },
+            };
+        
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
+        
+            getEmployeeByIdService.mockResolvedValueOnce({
+                id: 1,
+            });
+        
+            updateEmployeeByAdminService.mockResolvedValueOnce(null);
+        
+            await updateEmployeeById(req, res, 1, 'admin');
+        
+            expect(res.status).toHaveBeenCalledWith(422);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: 'This mail is already linked on an account',
+            });
+            expect(res.send).not.toHaveBeenCalled();
+        });
+
+        it('should return 422 status when updating employee with duplicate email by employee', async () => {
+            const req = {
+                params: {
+                    id: 1,
+                },
+                body: {
+                    mail: 'duplicate@example.com',
+                    password: 'password'
+                },
+            };
+        
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
+        
+            getEmployeeByIdService.mockResolvedValueOnce({
+                id: 1,
+            });
+        
+            updateEmployeeByEmployeeService.mockResolvedValueOnce(null);
+        
+            await updateEmployeeById(req, res, 1, 'employee');
+        
+            expect(res.status).toHaveBeenCalledWith(422);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: 'This mail is already linked on an account',
+            });
+            expect(res.send).not.toHaveBeenCalled();
+        });
+
+        it('should return 400 status when updating employee by admin with invalid request body', async () => {
+            const req = {
+                params: {
+                    id: 1,
+                },
+                body: {
+                    
+                },
+            };
+        
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
+        
+            getEmployeeByIdService.mockResolvedValueOnce({
+                id: 1
+            });
+        
+            await updateEmployeeById(req, res, 1, 'admin');
+        
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: expect.any(Array),
+            });
+            expect(res.send).not.toHaveBeenCalled();
+        });
+
+        it('should return 400 status when updating employee by employee with invalid request body', async () => {
+            const req = {
+                params: {
+                    id: 1,
+                },
+                body: {
+                    
+                },
+            };
+        
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
+        
+            getEmployeeByIdService.mockResolvedValueOnce({
+                id: 1
+            });
+        
+            await updateEmployeeById(req, res, 1, 'employee');
+        
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: expect.any(Array),
+            });
+            expect(res.send).not.toHaveBeenCalled();
+        });
+
+        it('should return 404 status when updating non-existent employee', async () => {
+            const req = {
+                params: {
+                    id: 1,
+                },
+                body: {
+                },
+            };
+        
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
+        
+            getEmployeeByIdService.mockResolvedValueOnce(null);
+        
+            await updateEmployeeById(req, res, 1, 'admin');
+        
+            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: "This employee doesn't exist",
+            });
+            expect(res.send).not.toHaveBeenCalled();
+        });
+    });
 });

@@ -1,19 +1,11 @@
-// Import required modules and the controller (functions)
-const { getCustomers,addCustomer, getCustomerById, updateCustomerById, updateCustomerByAdmin, updateCustomerByCustomer, deleteCustomerById} = require('../../controllers/customersController');
-const { getCustomerById: getCustomerByIdService, addCustomer: addCustomerService , getCustomers: getCustomersService, updateCustomerById: updateCustomerByIdService, updateCustomerByAdmin: updateCustomerByAdminService, updateCustomerByCustomer: updateCustomerByCustomerService, deleteCustomerById: deleteCustomerByIdService} = require('../../services/customersService');
-const { getFoodById } = require('../../controllers/foodsController');
-const { getFoodById : getFoodByIdService} = require('../../services/foodsService');
-
-
+///////////////// IMPORT ALL THE FUNCTIONS ////////////////
+const { getCustomers, addCustomer, getCustomerById, updateCustomerById, deleteCustomerById} = require('../../controllers/customersController');
+const { getCustomerById: getCustomerByIdService, addCustomer: addCustomerService , getCustomers: getCustomersService, updateCustomerByAdmin: updateCustomerByAdminService, updateCustomerByCustomer: updateCustomerByCustomerService, deleteCustomerById: deleteCustomerByIdService} = require('../../services/customersService');
 const bcrypt = require('bcrypt');
-const Ajv = require('ajv');
-const ajv = new Ajv();
 
-// Mocking the services
-jest.mock('ajv');
+///////////////// MOCKING THE SERVICES ////////////////
 jest.mock('../../services/customersService');
 jest.mock('bcrypt');
-const mockAjv = new Ajv();
 
 ///////////////// GLOBAL CUSTOMERS ////////////////
 describe('Customers Controller', () => {
@@ -22,7 +14,6 @@ describe('Customers Controller', () => {
     describe(' Get /customers', () => {
         ///////////////// WHEN IT RETURN THE LIST /////////////////
         it('should get the list of customers', async () => {
-            // Mock of the data of the customer in the database
             const listCustomers = [
                 { id: 1, firstname: 'Yeah', lastname: 'Yoo', mail: 'yeahyoo@gmail.com' },
                 { id: 2, firstname: 'L', lastname: 'A', mail: 'LA@gmail.com' },
@@ -42,7 +33,6 @@ describe('Customers Controller', () => {
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith({ success: true, data: listCustomers });
 
-            // Reset mock
             jest.clearAllMocks();
         });
     });
@@ -50,123 +40,99 @@ describe('Customers Controller', () => {
     /////////////// GET A CUSTOMER BY HIS ID ///////////////
     describe('getCustomerById', () => {
       it('should get a customer by ID - status: 200', async () => {
-        // Arrange
         const mockCustomerId = 1;
         const mockLoggedInUserId = 1;
         const mockRole = 'customer';
-    
-        // Mock the getCustomerById function to return a customer
+
         const mockCustomer = { id: mockCustomerId, name: 'John Doe', email: 'john@example.com' };
         getCustomerByIdService.mockResolvedValueOnce(mockCustomer);
     
-        // Mock the request object
         const mockReq = {
           params: { id: mockCustomerId },
           user: { id: mockLoggedInUserId, role: mockRole },
         };
-    
-        // Mock the response object
+
         const mockRes = {
           status: jest.fn().mockReturnThis(),
           json: jest.fn(),
         };
-    
-        // Act
+
         await getCustomerById(mockReq, mockRes, mockLoggedInUserId, mockRole);
     
-        // Assert
         expect(getCustomerByIdService).toHaveBeenCalledWith(mockCustomerId);
         expect(mockRes.status).toHaveBeenCalledWith(200);
         expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: mockCustomer });
       });
     
       it('should return 404 for non-existing customer', async () => {
-        // Arrange
         const mockCustomerId = 1;
         const mockLoggedInUserId = 1;
         const mockRole = 'customer';
     
-        // Mock the getCustomerById function to return null (indicating that the customer doesn't exist)
         getCustomerByIdService.mockResolvedValueOnce(null);
     
-        // Mock the request object
         const mockReq = {
           params: { id: mockCustomerId },
           user: { id: mockLoggedInUserId, role: mockRole },
         };
-    
-        // Mock the response object
+
         const mockRes = {
           status: jest.fn().mockReturnThis(),
           json: jest.fn(),
         };
-    
-        // Act
+
         await getCustomerById(mockReq, mockRes, mockLoggedInUserId, mockRole);
-    
-        // Assert
+
         expect(getCustomerByIdService).toHaveBeenCalledWith(mockCustomerId);
         expect(mockRes.status).toHaveBeenCalledWith(404);
         expect(mockRes.json).toHaveBeenCalledWith({ success: false, message: "This customer doesn't exist" });
       });
     
       it('should return 403 for unauthorized access', async () => {
-        // Arrange
-        const mockCustomerId = 2; // Different customer ID
+        const mockCustomerId = 2; 
         const mockLoggedInUserId = 1;
         const mockRole = 'customer';
-    
-        // Mock the getCustomerById function to return a customer with a different ID
+
         const mockCustomer = { id: mockCustomerId, name: 'Jane Doe', email: 'jane@example.com' };
         getCustomerByIdService.mockResolvedValueOnce(mockCustomer);
-    
-        // Mock the request object
+
         const mockReq = {
           params: { id: mockCustomerId },
           user: { id: mockLoggedInUserId, role: mockRole },
         };
-    
-        // Mock the response object
+
         const mockRes = {
           status: jest.fn().mockReturnThis(),
           json: jest.fn(),
         };
-    
-        // Act
+
         await getCustomerById(mockReq, mockRes, mockLoggedInUserId, mockRole);
-    
-        // Assert
+
         expect(getCustomerByIdService).toHaveBeenCalledWith(mockCustomerId);
         expect(mockRes.status).toHaveBeenCalledWith(403);
         expect(mockRes.json).toHaveBeenCalledWith({ success: false, message: 'Access forbidden: You cannot view an account that does not belong to you' });
       });
     
       it('should allow access for admin', async () => {
-        // Arrange
-        const mockCustomerId = 2; // Different customer ID
+        const mockCustomerId = 2;
         const mockLoggedInUserId = 1;
         const mockRole = 'admin';
-    
-        // Mock the getCustomerById function to return a customer with a different ID
+
         const mockCustomer = { id: mockCustomerId, name: 'Jane Doe', email: 'jane@example.com' };
         getCustomerByIdService.mockResolvedValueOnce(mockCustomer);
-    
-        // Mock the request object
+
         const mockReq = {
           params: { id: mockCustomerId },
           user: { id: mockLoggedInUserId, role: mockRole },
         };
-    
-        // Mock the response object
+
         const mockRes = {
           status: jest.fn().mockReturnThis(),
           json: jest.fn(),
         };
-    
-        // Act
+
         await getCustomerById(mockReq, mockRes, mockLoggedInUserId, mockRole);
-    
-        // Assert
+
         expect(getCustomerByIdService).toHaveBeenCalledWith(mockCustomerId);
         expect(mockRes.status).toHaveBeenCalledWith(200);
         expect(mockRes.json).toHaveBeenCalledWith({ success: true, data: mockCustomer });
@@ -174,10 +140,9 @@ describe('Customers Controller', () => {
     });
 
 
-    ///////////////// POST ADD A CUSTOMER  //////////////////
+    ///////////////// ADD A CUSTOMER  //////////////////
     describe('addCustomer', () => {
       it('should add a customer - status: 201', async () => {
-        // Arrange
         const mockReq = {
           body: {
             firstname: 'John',
@@ -189,24 +154,19 @@ describe('Customers Controller', () => {
             town: 'City',
           },
         };
-    
-        // Mock bcrypt.hash to return a hashed password
+
         bcrypt.hash.mockResolvedValue('hashedPassword123');
     
-        // Mock the addCustomer function to return a customer
         const mockCustomer = { id: 1, firstname: 'John', lastname: 'Doe', mail: 'john@example.com' };
         addCustomerService.mockResolvedValueOnce(mockCustomer);
-    
-        // Mock the response object
+
         const mockRes = {
           status: jest.fn().mockReturnThis(),
           json: jest.fn(),
         };
     
-        // Act
         await addCustomer(mockReq, mockRes);
-    
-        // Assert
+
         expect(addCustomerService).toHaveBeenCalledWith('John', 'Doe', 'john@example.com', 'hashedPassword123', '12345', '123 Main St', 'City');
         expect(bcrypt.hash).toHaveBeenCalledWith('password123', 10);
         expect(mockRes.status).toHaveBeenCalledWith(201);
@@ -214,7 +174,6 @@ describe('Customers Controller', () => {
       });
     
       it('should return 422 for an existing mail', async () => {
-        // Arrange
         const mockReq = {
           body: {
             firstname: 'Jane',
@@ -226,23 +185,18 @@ describe('Customers Controller', () => {
             town: 'City',
           },
         };
-    
-        // Mock bcrypt.hash to return a hashed password
+
         bcrypt.hash.mockResolvedValue('hashedPassword456');
-    
-        // Mock the addCustomer function to return null (indicating that the mail is already linked to an account)
+
         addCustomerService.mockResolvedValueOnce(null);
-    
-        // Mock the response object
+
         const mockRes = {
           status: jest.fn().mockReturnThis(),
           json: jest.fn(),
         };
-    
-        // Act
+
         await addCustomer(mockReq, mockRes);
-    
-        // Assert
+
         expect(addCustomerService).toHaveBeenCalledWith('Jane', 'Doe', 'jane@example.com', 'hashedPassword456', '54321', '456 Main St', 'City');
         expect(bcrypt.hash).toHaveBeenCalledWith('password456', 10);
         expect(mockRes.status).toHaveBeenCalledWith(422);
@@ -254,113 +208,90 @@ describe('Customers Controller', () => {
     //////////// DELETE A CUSTOMER ////////////
     describe('deleteCustomerById', () => {
       it('should delete a customer - status: 204', async () => {
-        // Arrange
         const mockReq = {
           params: {
             id: '1',
           },
         };
-    
-        // Mock the getCustomerById function to return a customer
+
         const mockCustomer = { id: 1, firstname: 'John', lastname: 'Doe', mail: 'john@example.com' };
         getCustomerByIdService.mockResolvedValueOnce(mockCustomer);
-    
-        // Mock the deleteCustomerByIdService function to indicate successful deletion
+
         deleteCustomerByIdService.mockResolvedValueOnce(true);
-    
-        // Mock the response object
+
         const mockRes = {
           status: jest.fn().mockReturnThis(),
           send: jest.fn(),
           json: jest.fn(),
         };
     
-        // Act
         await deleteCustomerById(mockReq, mockRes, 1);
     
-        // Assert
         expect(getCustomerByIdService).toHaveBeenCalledWith('1');
         expect(deleteCustomerByIdService).toHaveBeenCalledWith('1');
         expect(mockRes.status).toHaveBeenCalledWith(204);
         expect(mockRes.send).toHaveBeenCalled();
-        expect(mockRes.json).not.toHaveBeenCalled(); // Assuming there's no JSON response for a successful deletion
+        expect(mockRes.json).not.toHaveBeenCalled();
       });
     
       it('should return 404 for a non-existent customer', async () => {
-        // Arrange
         const mockReq = {
           params: {
             id: '1',
           },
         };
-    
-        // Mock the getCustomerById function to return null (indicating a non-existent customer)
         getCustomerByIdService.mockResolvedValueOnce(null);
     
-        // Mock the response object
         const mockRes = {
           status: jest.fn().mockReturnThis(),
           json: jest.fn(),
         };
     
-        // Act
         await deleteCustomerById(mockReq, mockRes, 1);
-    
-        // Assert
+
         expect(getCustomerByIdService).toHaveBeenCalledWith('1');
         expect(mockRes.status).toHaveBeenCalledWith(404);
         expect(mockRes.json).toHaveBeenCalledWith({ success: false, message: "This customer doesn't exist" });
       });
     
       it('should return 403 for a customer that does not belong to the user', async () => {
-        // Arrange
         const mockReq = {
           params: {
             id: '2',
           },
         };
-    
-        // Mock the getCustomerById function to return a customer with a different ID
+
         const mockCustomer = { id: 2, firstname: 'Jane', lastname: 'Doe', mail: 'jane@example.com' };
         getCustomerByIdService.mockResolvedValueOnce(mockCustomer);
-    
-        // Mock the response object
         const mockRes = {
           status: jest.fn().mockReturnThis(),
           json: jest.fn(),
         };
     
-        // Act
         await deleteCustomerById(mockReq, mockRes, 1);
     
-        // Assert
         expect(getCustomerByIdService).toHaveBeenCalledWith('2');
         expect(mockRes.status).toHaveBeenCalledWith(403);
         expect(mockRes.json).toHaveBeenCalledWith({ success: false, message: 'Access forbidden: You cannot delete an account that does not belong to you' });
       });
     
       it('should return 422 if the customer has deliveries in progress', async () => {
-        // Arrange
         const mockReq = {
           params: {
             id: '1',
           },
         };
       
-        // Mock the getCustomerById function to return a customer
         const mockCustomer = { id: 1, firstname: 'John', lastname: 'Doe', mail: 'john@example.com' };
         getCustomerByIdService.mockResolvedValueOnce(mockCustomer);
         
-        // Mock the response object
         const mockRes = {
           status: jest.fn().mockReturnThis(),
           json: jest.fn(),
         };
       
-        // Act
         await deleteCustomerById(mockReq, mockRes, 1);
-      
-        // Assert
+
         expect(getCustomerByIdService).toHaveBeenCalledWith('1');
         expect(deleteCustomerByIdService).toHaveBeenCalledWith('1');
         expect(mockRes.status).toHaveBeenCalledWith(422);
@@ -369,289 +300,266 @@ describe('Customers Controller', () => {
       
     });
 
-
-    ////// UPDATE A CUSTOMER ///////
+    ///////////////// UPDATE A CUSTOMER  //////////////////
     describe('updateCustomerById', () => {
+        it('should update a customer by admin successfully', async () => {
+            const req = {
+                params: {
+                    id: 1,
+                },
+                body: {
+                    firstname: 'Crost',
+                    lastname: 'Ella',
+                    mail: 'newemail@example.com',
+                    password: 'newpassword',
+                    zipCode: 12345,
+                    address: 'New Address',
+                    town: 'New Town',
+                },
+            };
+    
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
 
-      it('should return 404 if the customer does not exist', async () => {
-        // Arrange
-        const mockReq = {
-          params: { id: 'customerId123' },
-        };
-        const mockRes = {
-          status: jest.fn().mockReturnThis(),
-          json: jest.fn(),
-        };
+            getCustomerByIdService.mockResolvedValueOnce({
+                id: 1
+            });
     
-        // Mock the behavior of getCustomerById
-        getCustomerByIdService.mockResolvedValue(null);
-    
-        // Act
-        await updateCustomerById(mockReq, mockRes);
-    
-        // Assert
-        expect(mockRes.status).toHaveBeenCalledWith(404);
-        expect(mockRes.json).toHaveBeenCalledWith({
-          success: false,
-          message: "This customer doesn't exist",
+            updateCustomerByAdminService.mockResolvedValueOnce({
+            });
+
+            await updateCustomerById(req, res, 1, 'admin');
+
+            expect(res.status).toHaveBeenCalledWith(204);
+            expect(res.json).not.toHaveBeenCalled();
+            expect(res.send).toHaveBeenCalled();
         });
-      });
     
-      it('should return 400 if request body does not match the schema', async () => {
-        // Arrange
-        const mockReq = {
-          params: { id: 'customerId123' },
-          body: {
-            firstname: 'Jeff',
-            lastname: 'Jeff',
-            mail: 'Jeff',
-            password: 'Jeff',
-            zipCode: 'Jeff',
-            address: 'Jeff',
-            town: 'Jeff',
-          },
-        };
-        const mockRes = {
-          status: jest.fn().mockReturnThis(),
-          json: jest.fn(),
-        };
-      
-        // Mock the behavior of getCustomerById
-        getCustomerByIdService.mockResolvedValue('customerId123');
-      
-        // Create a new instance of Ajv
-        mockAjv.validate.mockReturnValue(false);
-        mockAjv.errors = undefined;
-          // Mock the behavior of AJV
-          mockAjv.validate.mockReturnValue(false);
-        // Act
-        await updateCustomerById(mockReq, mockRes, 'customerId123', 'admin');
-      
-        // Assert
-        expect(mockRes.status).toHaveBeenCalledWith(400);
-        expect(mockRes.json).toHaveBeenCalledWith({
-          success: false,
-          message: mockAjv.errors,
+        it('should update a customer by customer successfully', async () => {
+            const req = {
+                params: {
+                    id: 1,
+                },
+                body: {
+                    mail: 'newemail@example.com',
+                    password: 'newpassword',
+                    zipCode: 12345,
+                    address: 'New Address',
+                    town: 'New Town',
+                },
+            };
+
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
+    
+            getCustomerByIdService.mockResolvedValueOnce({
+                id: 1,
+            });
+
+            updateCustomerByCustomerService.mockResolvedValueOnce({});
+    
+            await updateCustomerById(req, res, 1, 'customer');
+    
+            expect(res.status).toHaveBeenCalledWith(204);
+            expect(res.json).not.toHaveBeenCalled();
+            expect(res.send).toHaveBeenCalled();
         });
+    
+        it('should return 403 status when updating customer with invalid role', async () => {
+            const req = {
+                params: {
+                    id: 1,
+                },
+                body: {
 
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-      it('should update a customer by admin - status: 204', async () => {
-        // Arrange
-        const mockReq = {
-          params: {
-            id: '1',
-          },
-          body: {
-            firstname: 'John',
-            lastname: 'Doe',
-            mail: 'john@example.com',
-            password: 'newPassword',
-            zipCode: '12345',
-            address: '123 Main St',
-            town: 'City'
-          }
-        };
-  
-        // Mock the getCustomerById function to return a customer
-        const mockCustomer = {
-          id: 1,
-          firstname: 'John',
-          lastname: 'Doe',
-          mail: 'john@example.com'
-        };
-  
+                },
+            };
         
-        getCustomerByIdService.mockResolvedValueOnce(mockCustomer);
-        bcrypt.hash.mockResolvedValue('hashedPassword123');
-        // Mock the updateCustomerByAdminService function to update the customer
-        updateCustomerByAdminService.mockResolvedValueOnce(mockCustomer);
-  
-        // Mock the response object
-        const mockRes = {
-          status: jest.fn().mockReturnThis(),
-          send: jest.fn(),
-          json: jest.fn(),
-        };
-  
-        // Act
-        await updateCustomerById(mockReq, mockRes, 1, 'admin');
-  
-        // Assert
-        expect(getCustomerByIdService).toHaveBeenCalledWith('1');
-        expect(updateCustomerByAdminService).toHaveBeenCalledWith(
-          '1',
-          'John',
-          'Doe',
-          'john@example.com',
-          'hashedPassword123',
-          '12345',
-          '123 Main St',
-          'City'
-        );
-        expect(mockRes.status).toHaveBeenCalledWith(204);
-        expect(mockRes.send).toHaveBeenCalled();
-        expect(mockRes.json).not.toHaveBeenCalled();
-      });
-  
-      it('should update a customer by customer - status: 204', async () => {
-        // Arrange
-        const mockReq = {
-          params: {
-            id: '1',
-          },
-          body: {
-            mail: 'john@example.com',
-            password: 'newPassword',
-            zipCode: '12345',
-            address: '123 Main St',
-            town: 'City'
-          }
-        };
-  
-        // Mock the getCustomerById function to return a customer
-        const mockCustomer = {
-          id: 1,
-          firstname: 'John',
-          lastname: 'Doe',
-          mail: 'john@example.com'
-        };
-        getCustomerByIdService.mockResolvedValueOnce(mockCustomer);
-        bcrypt.hash.mockResolvedValue('hashedPassword123');
-  
-        // Mock the updateCustomerByCustomerService function to update the customer
-        updateCustomerByCustomerService.mockResolvedValueOnce(mockCustomer);
-  
-        // Mock the response object
-        const mockRes = {
-          status: jest.fn().mockReturnThis(),
-          send: jest.fn(),
-          json: jest.fn(),
-        };
-  
-        // Act
-        await updateCustomerById(mockReq, mockRes, 1, 'customer');
-  
-        // Assert
-        expect(getCustomerByIdService).toHaveBeenCalledWith('1');
-        expect(updateCustomerByCustomerService).toHaveBeenCalledWith(
-          '1',
-          'john@example.com',
-          'hashedPassword123',
-          '12345',
-          '123 Main St',
-          'City'
-        );
-        expect(mockRes.status).toHaveBeenCalledWith(204);
-        expect(mockRes.send).toHaveBeenCalled();
-        expect(mockRes.json).not.toHaveBeenCalled();
-      });
-  
-      it('should return 422 if mail is already linked to an account', async () => {
-        // Arrange
-        const mockReq = {
-          params: {
-            id: '1',
-          },
-          body: {
-            firstname: 'John',
-            lastname: 'Doe',
-            mail: 'john@example.com',
-            password: 'newPassword',
-            zipCode: '12345',
-            address: '123 Main St',
-            town: 'City'
-          }
-        };
-  
-        // Mock the getCustomerById function to return a customer
-        const mockCustomer = {
-          id: 1,
-          firstname: 'John',
-          lastname: 'Doe',
-          mail: 'john@example.com'
-        };
-        getCustomerByIdService.mockResolvedValueOnce(mockCustomer);
-        bcrypt.hash.mockResolvedValue('hashedPassword123');
-  
-        // Mock the updateCustomerByAdminService function to indicate that mail is already linked
-        updateCustomerByAdminService.mockResolvedValueOnce(null);
-  
-        // Mock the response object
-        const mockRes = {
-          status: jest.fn().mockReturnThis(),
-          json: jest.fn(),
-        };
-  
-        // Act
-        await updateCustomerById(mockReq, mockRes, 1, 'admin');
-  
-        // Assert
-        expect(getCustomerByIdService).toHaveBeenCalledWith('1');
-        expect(updateCustomerByAdminService).toHaveBeenCalledWith(
-          '1',
-          'John',
-          'Doe',
-          'john@example.com',
-          'hashedPassword123',
-          '12345',
-          '123 Main St',
-          'City'
-        );
-        expect(mockRes.status).toHaveBeenCalledWith(422);
-        expect(mockRes.json).toHaveBeenCalledWith({ success: false, message: "This mail is already linked on an account" });
-      });
-  
-      it('should return 403 for unauthorized update attempt', async () => {
-        // Arrange
-        const mockReq = {
-          params: {
-            id: '1',
-          },
-          body: {
-            mail: 'john@example.com',
-            password: 'newPassword',
-            zipCode: '12345',
-            address: '123 Main St',
-            town: 'City'
-          }
-        };
-  
-        // Mock the getCustomerById function to return a customer
-        const mockCustomer = {
-          id: 1,
-          firstname: 'John',
-          lastname: 'Doe',
-          mail: 'john@example.com'
-        };
-        getCustomerByIdService.mockResolvedValueOnce(mockCustomer);
-  
-        // Mock the response object
-        const mockRes = {
-          status: jest.fn().mockReturnThis(),
-          json: jest.fn(),
-        };
-  
-        // Act
-        await updateCustomerById(mockReq, mockRes, 1, 'invalidRole');
-  
-        // Assert
-        expect(getCustomerByIdService).toHaveBeenCalledWith('1');
-        expect(mockRes.status).toHaveBeenCalledWith(403);
-        expect(mockRes.json).toHaveBeenCalledWith({ success: false, message: 'Access forbidden: You cannot modify an account that does not belong to you' });
-      });
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
+ 
+            getCustomerByIdService.mockResolvedValueOnce({
+                id: 1
+            });
+        
+            await updateCustomerById(req, res, 6, 'invalid_role');
+        
+            expect(res.status).toHaveBeenCalledWith(403);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: 'Access forbidden: You cannot modify an account that does not belong to you',
+            });
+            expect(res.send).not.toHaveBeenCalled();
+        });
+    
+        it('should return 422 status when updating customer with duplicate email', async () => {
+            const req = {
+                params: {
+                    id: 1,
+                },
+                body: {
+                    firstname: 'Crost',
+                    lastname: 'Ella',
+                    mail: 'duplicate@example.com',
+                    password: 'newpassword',
+                    zipCode: 12345,
+                    address: 'New Address',
+                    town: 'New Town',
+                },
+            };
+        
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
+        
+            getCustomerByIdService.mockResolvedValueOnce({
+                id: 1
+            });
+
+            updateCustomerByAdminService.mockResolvedValueOnce(null);
+
+            await updateCustomerById(req, res, 1, 'admin');
+        
+            expect(res.status).toHaveBeenCalledWith(422);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: 'This mail is already linked on an account',
+            });
+            expect(res.send).not.toHaveBeenCalled();
+        });
+    
+        it('should return 422 status when updating customer by customer with duplicate email', async () => {
+            const req = {
+                params: {
+                    id: 1,
+                },
+                body: {
+                    mail: 'newemail@example.com',
+                    password: 'newpassword',
+                    zipCode: 12345,
+                    address: 'New Address',
+                    town: 'New Town',
+                },
+            };
+        
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
+        
+            getCustomerByIdService.mockResolvedValueOnce({
+                id: 1
+            });
+
+            updateCustomerByCustomerService.mockResolvedValueOnce(null);
+
+            await updateCustomerById(req, res, 1, 'customer');
+
+            expect(res.status).toHaveBeenCalledWith(422);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: 'This mail is already linked on an account',
+            });
+            expect(res.send).not.toHaveBeenCalled();
+        });
+    
+        it('should return 400 status when updating customer by admin with invalid request body', async () => {
+            const req = {
+                params: {
+                    id: 1
+                },
+                body: {
+
+                },
+            };
+        
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
+        
+            getCustomerByIdService.mockResolvedValueOnce({
+                id: 1
+            });
+        
+            await updateCustomerById(req, res, 1, 'admin');
+
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: expect.any(Array),
+            });
+            expect(res.send).not.toHaveBeenCalled();
+        });
+    
+        it('should return 400 status when updating customer by customer with invalid request body', async () => {
+            const req = {
+                params: {
+                    id: 1,
+                },
+                body: {
+
+                },
+            };
+        
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
+        
+            getCustomerByIdService.mockResolvedValueOnce({
+                id: 1
+            });
+
+            await updateCustomerById(req, res, 1, 'customer');
+        
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: expect.any(Array),
+            });
+            expect(res.send).not.toHaveBeenCalled();
+        });
+    
+        it('should return 404 status when updating non-existent customer', async () => {
+            const req = {
+                params: {
+                    id: 12313,
+                },
+                body: {
+                },
+            };
+        
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn(),
+                send: jest.fn(),
+            };
+        
+            getCustomerByIdService.mockResolvedValueOnce(null); 
+        
+            await updateCustomerById(req, res,1, 'admin');
+        
+            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: "This customer doesn't exist",
+            });
+            expect(res.send).not.toHaveBeenCalled();
+        });
     });
-   
 });

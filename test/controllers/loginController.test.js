@@ -1,20 +1,20 @@
+///////////////// IMPORT ALL THE FUNCTIONS ////////////////
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const db = require('../../models/index');
-const { login } = require('../../controllers/loginController');
+const { login,authMiddleware, checkAuthorizationHeader} = require('../../controllers/loginController');
+const { getRoleService } = require('../../services/employeesService.js');
 
-// Mocking the bcrypt.compare function
+///////////////// MOCKING THE SERVICES ////////////////
 jest.mock('bcrypt', () => ({
   compare: jest.fn(),
 }));
 
-// Mocking the jwt.sign function
 jest.mock('jsonwebtoken', () => ({
   sign: jest.fn(),
   verify: jest.fn(),
 }));
 
-// Mocking the db.customers and db.employees models
 jest.mock('../../models/index', () => ({
   customers: {
     findOne: jest.fn(),
@@ -24,9 +24,16 @@ jest.mock('../../models/index', () => ({
   },
 }));
 
-describe('Auth Controller - Login', () => {
+const mockNext = jest.fn();
+const mockRes = {
+    status: jest.fn(() => mockRes),
+    json: jest.fn(),
+};
+
+///////////////// GLOBAL CONTROLLER ////////////////
+///////////////// LOGIN ////////////////
+describe('Login', () => {
   it('should login successfully and return a token', async () => {
-    // Mock data for the request
     const mockReq = {
       body: {
         mail: 'test@example.com',
@@ -35,108 +42,171 @@ describe('Auth Controller - Login', () => {
       },
     };
 
-    // Mock data for the customer
     const mockCustomer = {
       id: 1,
       mail: 'test@example.com',
       password: 'hashedPassword123',
     };
 
-    // Mock the behavior of the db.customers.findOne function
     db.customers.findOne.mockResolvedValue(mockCustomer);
 
-    // Mock the behavior of the bcrypt.compare function
     bcrypt.compare.mockResolvedValue(true);
 
-    // Mock the behavior of the jwt.sign function
     jwt.sign.mockReturnValue('mockedToken');
 
-    // Mock Express response object
     const mockRes = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
     };
 
-    // Call the login method
     await login(mockReq, mockRes);
 
-    // Verify that the response status and JSON are as expected
     expect(mockRes.status).toHaveBeenCalledWith(200);
     expect(mockRes.json).toHaveBeenCalledWith({ success: true, token: 'mockedToken', role: 'customer' });
   });
 
+  it('should return a 404 status when user is not found', async () => {
+    const mockReq = {
+      body: {
+        mail: 'nonexistent@example.com',
+        password: 'password123',
+        role: 'customer',
+      },
+    };
+
+    db.customers.findOne.mockResolvedValue(null);
+
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await login(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(404);
+    expect(mockRes.json).toHaveBeenCalledWith({ success: false, message: "This user doesn't exists" });
+  });
+
+  it('should return a 401 status when password is incorrect', async () => {
+    const mockReq = {
+      body: {
+        mail: 'test@example.com',
+        password: 'incorrectPassword',
+        role: 'customer',
+      },
+    };
+
+    const mockCustomer = {
+      id: 1,
+      mail: 'test@example.com',
+      password: 'hashedPassword123',
+    };
+
+    db.customers.findOne.mockResolvedValue(mockCustomer);
+
+    bcrypt.compare.mockResolvedValue(false);
+
+    const mockRes = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await login(mockReq, mockRes);
+
+    expect(mockRes.status).toHaveBeenCalledWith(401);
+    expect(mockRes.json).toHaveBeenCalledWith({ success: false, message: 'Password is incorrect' });
+  });
+  
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+});
+  
+
+///////////////// AUTHMIDDLEWARE ////////////////
+describe('authMiddleware', () => {
+      const mockNext = jest.fn();
+      const mockRes = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+  
+      beforeEach(() => {
+          jest.clearAllMocks();
+      });
+
+      it('should call next() if valid token is present in the header', async () => {
+          const req = { header: jest.fn(() => 'validToken') };
+  
+          jwt.verify.mockImplementationOnce((token, secret, callback) => {
+              callback(null, { role: 'admin' });
+          });
+  
+          await authMiddleware(['admin'])(req, mockRes, mockNext);
+  
+          expect(req.header).toHaveBeenCalledWith('Authorization');
+          expect(jwt.verify).toHaveBeenCalledWith('validToken', process.env.secretKey, expect.any(Function));
+          expect(mockNext).toHaveBeenCalled();
+          expect(mockRes.status).not.toHaveBeenCalled();
+          expect(mockRes.json).not.toHaveBeenCalled();
+      });
+  
+      it('should return 403 if token is invalid', async () => {
+          const req = { header: jest.fn(() => 'invalidToken') };
+  
+          jwt.verify.mockImplementationOnce((token, secret, callback) => {
+              callback('TokenError');
+          });
+
+          await authMiddleware(['admin'])(req, mockRes, mockNext);
+  
+          expect(req.header).toHaveBeenCalledWith('Authorization');
+          expect(jwt.verify).toHaveBeenCalledWith('invalidToken', process.env.secretKey, expect.any(Function));
+          expect(mockNext).not.toHaveBeenCalled();
+          expect(mockRes.status).toHaveBeenCalledWith(403);
+          expect(mockRes.json).toHaveBeenCalledWith({
+              success: false,
+              message: 'Access forbidden: The token is invalid',
+          });
+      });
+
+      /*it('should return 401 if no token is present in the header', async () => {
+        const req = { };
+
+        await authMiddleware(['admin'])(req, mockRes, mockNext);
+
+        expect(req.headers).toBeDefined();
+        expect(req.headers.authorization).toBeUndefined();
+        expect(mockNext).not.toHaveBeenCalled();
+        expect(mockRes.status).toHaveBeenCalledWith(401);
+        expect(mockRes.json).toHaveBeenCalledWith({
+            success: false,
+            message: 'Access forbidden: You must be logged in to do this',
+        });
+    });
+
+    /*it('should return 403 if user role is not allowed', async () => {
+        // Mock req with a valid token
+        const req = { header: jest.fn(() => 'validToken') };
+  
+        jwt.verify.mockImplementationOnce((token, secret, callback) => {
+            callback(null, { role: 'user' });
+        });
+  
+        await authMiddleware(['admin'])(req, mockRes, mockNext);
+  
+        // Assertions
+        expect(req.headers).toBeDefined();
+        expect(req.headers.authorization).toBe('validToken');
+        expect(jwt.verify).toHaveBeenCalledWith('validToken', process.env.secretKey, expect.any(Function));
+        expect(mockNext).not.toHaveBeenCalled();
+        expect(mockRes.status).toHaveBeenCalledWith(403);
+        expect(mockRes.json).toHaveBeenCalledWith({
+            success: false,
+            message: 'Access forbidden: You are not allowed to do that with your role',
+        });
+    });*/
+      
 });
 
-describe('Auth Controller - Login', () => {
-    // Previous test case...
+
   
-    it('should return a 404 status when user is not found', async () => {
-      // Mock data for the request
-      const mockReq = {
-        body: {
-          mail: 'nonexistent@example.com',
-          password: 'password123',
-          role: 'customer',
-        },
-      };
-  
-      // Mock the behavior of the db.customers.findOne function
-      db.customers.findOne.mockResolvedValue(null);
-  
-      // Mock Express response object
-      const mockRes = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      };
-  
-      // Call the login method
-      await login(mockReq, mockRes);
-  
-      // Verify that the response status and JSON are as expected
-      expect(mockRes.status).toHaveBeenCalledWith(404);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: false, message: "This user doesn't exists" });
-    });
-  
-    it('should return a 401 status when password is incorrect', async () => {
-      // Mock data for the request
-      const mockReq = {
-        body: {
-          mail: 'test@example.com',
-          password: 'incorrectPassword',
-          role: 'customer',
-        },
-      };
-  
-      // Mock data for the customer
-      const mockCustomer = {
-        id: 1,
-        mail: 'test@example.com',
-        password: 'hashedPassword123',
-      };
-  
-      // Mock the behavior of the db.customers.findOne function
-      db.customers.findOne.mockResolvedValue(mockCustomer);
-  
-      // Mock the behavior of the bcrypt.compare function
-      bcrypt.compare.mockResolvedValue(false);
-  
-      // Mock Express response object
-      const mockRes = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      };
-  
-      // Call the login method
-      await login(mockReq, mockRes);
-  
-      // Verify that the response status and JSON are as expected
-      expect(mockRes.status).toHaveBeenCalledWith(401);
-      expect(mockRes.json).toHaveBeenCalledWith({ success: false, message: 'Password is incorrect' });
-    });
-  
-    // Add more test cases for other scenarios...
-  
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-  });
+
