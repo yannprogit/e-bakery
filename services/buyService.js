@@ -143,6 +143,10 @@ exports.updateStatus = async (id, hour) => {
     }
 }
 
+
+
+
+
 //Update the validation for a buy by its id
 exports.updateValidation = async (id) => {
     const buy = await db.buy.findOne({
