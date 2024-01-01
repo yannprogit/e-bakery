@@ -1,0 +1,1816 @@
+openapi: 3.0.3
+info:
+  title: E-Bakery
+  description: This API is an online bakery api open 24 hours a day, every day, where you can order food and have it delivered.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+tags:
+  - name: Customers
+    description: Everything about customers
+  - name: Employees
+    description: Everything about employees
+  - name: Foods
+    description: Everything about foods
+  - name: Ingredients
+    description: Everything about ingredients
+  - name: Purchases
+    description: Everything about purchases
+  - name: Compositions
+    description: Everything about compositions
+  - name: Login
+    description: To log in
+  - name: Populate-db
+    description: To populate database
+      
+paths:
+  /customers:
+    get:
+      tags:
+        - Customers
+      summary: Get all the customers
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+      description: Return an array of customers
+      operationId: getCustomers
+      responses:
+        '200':
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/customerList'
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+          
+    post:
+      tags:
+        - Customers
+      summary: Add a new customer
+      description: Add a new customer
+      operationId: addCustomer
+      requestBody:
+        $ref: '#/components/requestBodies/customerCreation'
+      responses:
+        '201':
+          description: New customer successfully added to the database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'          
+        '400':
+          $ref: '#/components/responses/errorArg' 
+        '422':
+          $ref: '#/components/responses/errorProcess' 
+          
+  /customers/{id}:
+    get:
+      tags:
+        - Customers
+      summary: Get the customer
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - customer
+      description: Return the customer
+      operationId: getCustomerById
+      parameters:
+        - $ref: '#/components/parameters/idInPath'
+      responses:
+        '200':
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '400':
+          $ref: '#/components/responses/errorArg'
+        '404':
+          $ref: "#/components/responses/notFound"
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+          
+    put:
+      tags:
+        - Customers
+      summary: Update a customer
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - customer
+      description: Update a customer
+      operationId: updateCustomer
+      parameters:
+        - $ref: '#/components/parameters/idInPath'
+      requestBody:
+        description: Update customer information
+        required: true
+        content:
+          application/json:
+            schema:
+              anyOf:
+              - $ref: '#/components/schemas/customerUpdateByCustomer'
+              - $ref: '#/components/schemas/customerUpdateByAdmin'
+      responses:
+        '204':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/errorArg' 
+        '404':
+          $ref: "#/components/responses/notFound"
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+        '422':
+          $ref: "#/components/responses/errorProcess"
+          
+    delete:
+      tags:
+        - Customers
+      summary: Delete a customer
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - customer
+      description: Delete a customer
+      operationId: deleteCustomer
+      parameters:
+        - $ref: '#/components/parameters/idInPath'
+      responses:
+        '204':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/errorArg' 
+        '404':
+          $ref: "#/components/responses/notFound"
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+        '422':
+          $ref: "#/components/responses/errorProcess"
+            
+            
+  /employees:
+    get:
+      tags:
+        - Employees 
+      summary: Get all the employees
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+      description: Return an array of employees
+      operationId: getEmployees
+      responses:
+        '200':
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/employeeList'
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+          
+    post:
+      tags:
+        - Employees
+      summary: Add a new employee
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - manager
+      description: Add a new employee
+      operationId: addEmployee
+      requestBody:
+        $ref: '#/components/requestBodies/employeeCreation'
+      responses:
+        '200':
+          description: New Employee successfully added to the list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'          
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+        '422':
+          $ref: "#/components/responses/errorProcess"
+        '400':
+          $ref: '#/components/responses/errorArg' 
+          
+  /employees/{id}:
+    get:
+      tags:
+        - Employees
+      summary: Get the employee
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - manager
+        - deliveryman
+        - baker
+        - cashier
+      description: Return the employee
+      operationId: getEmployeeById
+      parameters:
+        - $ref: '#/components/parameters/idInPath'
+      responses:
+        '200':
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+        '400':
+          $ref: '#/components/responses/errorArg'
+        '404':
+          $ref: "#/components/responses/notFound"
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+
+    put:
+      tags:
+        - Employees
+      summary: Update an employee
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - manager
+        - deliveryman
+        - baker
+        - cashier
+      description: An employee can update his account (mail and password), an admin all the employee information and a manager the endContract date
+      operationId: updateEmployee
+      parameters:
+        - $ref: '#/components/parameters/idInPath'
+      requestBody:
+        description: Update employee information
+        required: true
+        content:
+          application/json:
+            schema:
+              anyOf:
+              - $ref: '#/components/schemas/employeeUpdateByEmployee'
+              - $ref: '#/components/schemas/employeeUpdateByAdmin'
+              - $ref: '#/components/schemas/employeeUpdateByManager'
+      responses:
+        '204':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/errorArg' 
+        '404':
+          $ref: "#/components/responses/notFound"
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+        '422':
+          $ref: "#/components/responses/errorProcess"
+          
+    delete:
+      tags:
+        - Employees
+      summary: Delete an employee
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - manager
+      description: Delete an employee
+      operationId: deleteEmployee
+      parameters:
+        - $ref: '#/components/parameters/idInPath'
+      responses:
+        '204':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/errorArg' 
+        '404':
+          $ref: "#/components/responses/notFound"
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+        '422':
+          $ref: "#/components/responses/errorProcess"
+
+  /employees/managers:
+    get:
+      tags:
+        - Employees 
+      summary: Get all the managers
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+      description: Return an array of managers
+      operationId: getManagers
+      responses:
+        '200':
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Manager'
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'   
+  /employees/cashiers:
+    get:
+      tags:
+        - Employees 
+      summary: Get all the cashiers
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - manager
+      description: Return an array of cashiers
+      operationId: getCashiers
+      responses:
+        '200':
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cashier'
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden' 
+  /employees/deliverymen:
+    get:
+      tags:
+        - Employees 
+      summary: Get all the deliverymen
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - manager
+      description: Return an array of deliverymen
+      operationId: getDeliverymen
+      responses:
+        '200':
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Deliveryman'
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'   
+  /employees/bakers:
+    get:
+      tags:
+        - Employees 
+      summary: Get all the bakers
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - manager
+      description: Return an array of bakers
+      operationId: getBakers
+      responses:
+        '200':
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Baker'
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'  
+            
+  /foods:
+    get:
+      tags:
+        - Foods 
+      summary: Get all the foods
+      description: Return an array of foods
+      operationId: getFoods
+      responses:
+        '200':
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/foodsList'
+          
+    post:
+      tags:
+        - Foods
+      summary: Add a new food
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - baker
+      description: Add a new food
+      operationId: addFood
+      requestBody:
+        $ref: '#/components/requestBodies/foodCreation'
+      responses:
+        '200':
+          description: new Food successfully added to the list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Food'          
+        '400':
+          $ref: '#/components/responses/errorArg' 
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+          
+  /foods/{id}:
+    get:
+      tags:
+        - Foods
+      summary: Get the food
+      description: Return the food
+      operationId: getFoodById
+      parameters:
+        - $ref: '#/components/parameters/idInPath'
+      responses:
+        '200':
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+        '400':
+          $ref: '#/components/responses/errorArg'
+        '404':
+          $ref: "#/components/responses/notFound"
+          
+    put:
+      tags:
+        - Foods
+      summary: Update a food
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - baker
+        - cashier
+      description: A baker can update the food except the price, because the cashier updates the price (and that's all he can do) and the admin can update all the information. Baker and Admin can also add stock with update
+      operationId: updateFood
+      parameters:
+        - $ref: '#/components/parameters/idInPath'
+      requestBody:
+        description: Update food information
+        required: true
+        content:
+          application/json:
+            schema:
+              anyOf:
+              - $ref: '#/components/schemas/foodUpdateByBaker'
+              - $ref: '#/components/schemas/foodUpdateByAdmin'
+              - $ref: '#/components/schemas/foodUpdateByCashier'
+      responses:
+        '204':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/errorArg' 
+        '404':
+          $ref: "#/components/responses/notFound"
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+        '422':
+          $ref: "#/components/responses/errorProcess"
+          
+    delete:
+        tags:
+          - Foods
+        summary: Delete a food
+        security:
+          - JWT: []
+        x-auth-roles: 
+          - admin
+          - baker
+        description: Delete a food
+        operationId: deleteFood
+        parameters:
+          - $ref: '#/components/parameters/idInPath'
+        responses:
+          '204':
+            description: successful operation
+          '400':
+            $ref: '#/components/responses/errorArg' 
+          '404':
+            $ref: "#/components/responses/notFound"
+          '401':
+            $ref: '#/components/responses/accessForbiddenLogged'
+          '403':
+            $ref: '#/components/responses/accessForbidden'
+          '422':
+            $ref: "#/components/responses/errorProcess"
+
+
+  /ingredients:
+    get:
+      tags:
+        - Ingredients 
+      summary: Get all the ingredients
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - baker
+      description: Return an array of ingredients
+      operationId: getIngredients
+      responses:
+        '200':
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ingredientsList'
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+          
+    post:
+      tags:
+        - Ingredients
+      summary: Add a new ingredient
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - baker
+      description: Add a new ingredient
+      operationId: addIngredient
+      requestBody:
+        $ref: '#/components/requestBodies/ingredientCreation'
+      responses:
+        '200':
+          description: new ingredient successfully added to the list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ingredient'          
+        '400':
+          $ref: '#/components/responses/errorArg'
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+          
+  /ingredients/{id}:
+    get:
+      tags:
+        - Ingredients
+      summary: Get the ingredient
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - baker
+      description: Return the ingredient
+      operationId: getIngredientById
+      parameters:
+        - $ref: '#/components/parameters/idInPath'
+      responses:
+        '200':
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ingredient'
+        '400':
+          $ref: '#/components/responses/errorArg'
+        '404':
+          $ref: "#/components/responses/notFound"
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+          
+    put:
+      tags:
+        - Ingredients
+      summary: Update an ingredient
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - baker
+      description: Update an ingredient and add stock for this ingredient
+      operationId: updateIngredient
+      requestBody:
+        $ref: '#/components/requestBodies/ingredientUpdate'
+      parameters:
+        - $ref: '#/components/parameters/idInPath'
+      responses:
+        '204':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/errorArg' 
+        '404':
+          $ref: "#/components/responses/notFound"
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+          
+    delete:
+      tags:
+        - Ingredients
+      summary: Delete an ingredient
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - baker
+      description: Delete an ingredient
+      operationId: deleteIngredient
+      parameters:
+        - $ref: '#/components/parameters/idInPath'
+      responses:
+        '204':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/errorArg' 
+        '404':
+          $ref: "#/components/responses/notFound"
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+            
+
+  /purchases:
+    get:
+      tags:
+        - Purchases 
+      summary: Get all the purchases
+      description: Return an array of purchases
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - cashier
+      operationId: getPurchases
+      responses:
+        '200':
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/purchasesList'
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+          
+    post:
+      tags:
+        - Purchases
+      summary: Add a new buy
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - customer
+      description: Add a new buy (in cart)
+      operationId: addPurchase
+      requestBody:
+        $ref: '#/components/requestBodies/buyCreation'
+      responses:
+        '200':
+          description: buy successfully added to the list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuyInCart'          
+        '400':
+          $ref: '#/components/responses/errorArg' 
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+          
+  /purchases/{id}:
+    get:
+      tags:
+        - Purchases
+      summary: Get the buy
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - customer
+        - deliveryman
+      description: Return the buy
+      operationId: getBuyById
+      parameters:
+        - $ref: '#/components/parameters/idInPath'
+      responses:
+        '200':
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Buy'
+        '400':
+          $ref: '#/components/responses/errorArg'
+        '404':
+          $ref: "#/components/responses/notFound"
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+          
+    put:
+      tags:
+        - Purchases
+      summary: Update a buy
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - customer
+        - deliveryman
+      description: The customer updates the status from "cart" to "paid" while indicating the hour he wants to be delivered, then the delivery driver updates the delivery date, and the customer validates the delivery
+      operationId: updateBuy
+      parameters:
+        - $ref: '#/components/parameters/idInPath'
+      requestBody:
+        $ref: '#/components/requestBodies/buyUpdateByCustomer'
+      responses:
+        '204':
+          description: successful operation 
+        '400':
+          $ref: '#/components/responses/errorArg'
+        '404':
+          $ref: "#/components/responses/notFound"
+        '422':
+          $ref: "#/components/responses/errorProcess"
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+          
+    delete:
+      tags:
+        - Purchases
+      summary: Delete a buy
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - customer
+      description: Delete a buy
+      operationId: deleteBuy
+      parameters:
+        - $ref: '#/components/parameters/idInPath'
+      responses:
+        '204':
+          description: successful operation 
+        '400':
+          $ref: '#/components/responses/errorArg'
+        '404':
+          $ref: "#/components/responses/notFound"
+        '422':
+          $ref: "#/components/responses/errorProcess"
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+          
+  /compositions:
+    get:
+      tags:
+        - Compositions
+      summary: Get all the compositions
+      description: Return an array of compositions
+      operationId: getCompositions
+      responses:
+        '200':
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/compositionsList'
+
+    post:
+      tags:
+        - Compositions
+      summary: Add a new contain
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - baker
+      description: Add a new contain
+      operationId: addContain
+      requestBody:
+        $ref: '#/components/requestBodies/containCreation'
+      responses:
+        '201':
+          description: new contain successfully added to the list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contain'          
+        '400':
+          $ref: '#/components/responses/errorArg'
+        '422':
+          $ref: "#/components/responses/errorProcess"
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+          
+  /compositions/{type}/{id}:
+    get:
+      tags:
+        - Compositions
+      summary: Get compositions
+      description: Return compositions of food or compositions which contain the ingredient
+      operationId: getSpecificCompositions
+      parameters:
+        - $ref: '#/components/parameters/idInPath'
+        - $ref: '#/components/parameters/typeInPath'
+      responses:
+        '200':
+          description: successful operation 
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/compositionsList'
+        '400':
+          $ref: '#/components/responses/errorArg'
+        '404':
+          $ref: "#/components/responses/notFound"
+
+  /compositions/food/{foodId}:
+    put:
+      tags:
+        - Compositions
+      summary: Replace an ingredient of a food
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - baker
+      description: Replace an ingredient of a food by an other ingredient
+      operationId: replaceIngredientOfFood
+      parameters:
+        - $ref: '#/components/parameters/foodIdInPath'
+      requestBody:
+        $ref: '#/components/requestBodies/containUpdate'
+      responses:
+        '204':
+          description: successful operation
+        '400':
+          $ref: '#/components/responses/errorArg'
+        '422':
+          $ref: "#/components/responses/errorProcess"
+        '404':
+          $ref: "#/components/responses/notFound"
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+
+    delete:
+      tags:
+        - Compositions
+      summary: Delete a contain or all compositions
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+        - baker
+      description: Delete a contain if there is no query or all compositions if there is a query which specifies the ingredient's id 
+      operationId: deleteContain
+      parameters:
+        - $ref: '#/components/parameters/foodIdInPath'
+        - name: ingredientId
+          in: query
+          description: The id of the ingredient (optional)
+          schema:
+            type: integer
+            format: int64
+          required: false
+      responses:
+        '204':
+          description: contain successfully deleted
+        '400':
+          $ref: '#/components/responses/errorArg'
+        '404':
+          $ref: "#/components/responses/notFound"  
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+
+  /login:
+    post:
+      tags:
+        - Login
+      summary: To log in
+      description: A customer or employee can log in
+      operationId: login
+      requestBody:
+        $ref: '#/components/requestBodies/logIn'
+      responses:
+        '200':
+          description: connected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/token'          
+        '400':
+          $ref: '#/components/responses/errorArg' 
+        '401':
+          $ref: '#/components/responses/invalidPassword'
+        '404':
+          $ref: "#/components/responses/notFound"
+          
+  /populate-db:
+    post:
+      tags:
+        - Populate-db
+      summary: To populate db
+      security:
+        - JWT: []
+      x-auth-roles: 
+        - admin
+      description: with extern data import thanks to axios, we can populate db
+      operationId: populate-db
+      responses:
+        '201':
+          description: imported data successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:  
+                  success:
+                    type: boolean
+                    example: true
+        '400':
+          $ref: '#/components/responses/cannotGetData' 
+        '500':
+          $ref: '#/components/responses/errorPopDB'
+        '401':
+          $ref: '#/components/responses/accessForbiddenLogged'
+        '403':
+          $ref: '#/components/responses/accessForbidden'
+            
+components:
+  parameters:
+    idInPath:
+      name: 'id'
+      in: 'path'
+      required: true
+      schema:
+        type: integer
+        format: int64
+    foodIdInPath:
+      name: 'foodId'
+      in: 'path'
+      required: true
+      schema:
+        type: integer
+        format: int64
+    typeInPath:
+      name: 'type'
+      in: 'path'
+      required: true
+      description: "type is food or ingredient"
+      schema:
+        type: string
+        enum:
+        - food
+        - ingredient
+
+  requestBodies:
+    customerCreation:
+      description: "Request to add a new customer"
+      required: true
+      content:
+        application/json:
+          schema:
+              type: object
+              required:
+              - firstname
+              - lastname
+              - mail
+              - password
+              - zipCode
+              - address
+              - town
+              properties:
+                firstname:
+                  type: string
+                  example: "Klie"
+                lastname:
+                  type: string
+                  example: "Yen"
+                mail:
+                  type: string
+                  pattern: '^[\w\.-]+@[\w\.-]+\.\w+$'
+                  example: "klie.yen@gmail.com"
+                password:
+                  type: string
+                  example: "mdp"
+                zipCode:
+                  type: integer
+                  minimum: 01000
+                  maximum: 98999
+                  example: 75600
+                address:
+                  type: string
+                  example: "8 rue de la merguez"
+                town:
+                  type: string
+                  pattern: "^[A-Za-zÀ-ÖØ-öø-ÿ-]+$"
+                  example: "Paris"
+    employeeCreation:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - firstname
+            - lastname
+            - mail
+            - role
+            - password
+            properties:
+              firstname:
+                type: string
+                example: "Hamp"
+              lastname:
+                type: string
+                example: "Loyé"
+              mail:
+                type: string
+                pattern: '^[\w\.-]+@[\w\.-]+\.\w+$'
+                example: "hamp.loye@gmail.com"
+              role:
+                type: integer
+                minimum: 1
+                maximum: 5
+                example: 2
+              password:
+                type: string
+                example: "mdp"
+    foodCreation:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - name
+            - price
+            - description
+            properties:
+              name:
+                type: string
+                example: "Croissant"
+              price:
+                type: number
+                minimum: 0.00
+                example: 2.5
+              description:
+                type: string
+                example: "It's a croissant"
+              stock:
+                type: integer
+                example: 77            
+    ingredientCreation:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - name
+            properties:
+              name:
+                type: string
+                example: "Yeast"
+              stock:
+                type: integer
+                example: 77              
+    buyCreation:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - foodId
+            - qty
+            properties:
+              foodId:
+                type: integer
+                example: 42
+              qty:
+                type: integer
+                example: 18            
+    containCreation:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - foodId
+            - ingredientId
+            properties:
+              foodId:
+                type: integer
+                example: 1
+              ingredientId:
+                type: integer
+                example: 5
+    containUpdate:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - ingredientId
+            - newIngredientId
+            properties:
+              ingredientId:
+                type: integer
+                example: 5
+              newIngredientId:
+                type: integer
+                example: 5
+    logIn:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - mail
+            - password
+            - role
+            properties:
+              mail:
+                type: string
+                pattern: '^[\w\.-]+@[\w\.-]+\.\w+$'
+                example: "leau.ghine@gmail.com"
+              password:
+                type: string
+                example: "mdp"
+              role:
+                type: string
+                enum:
+                - customer
+                - employee
+                example: "employee"
+    ingredientUpdate:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - name
+            properties:
+              name:
+                type: string
+                example: "Yeast"
+              addStock:
+                type: integer
+                example: 6
+    buyUpdateByCustomer:
+      required: false
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              hour:
+                type: string
+                example: "10:50"
+
+  schemas:
+    customerUpdateByAdmin:
+                type: object
+                properties:
+                  firstname:
+                    type: string
+                    example: "Klie"
+                  lastname:
+                    type: string
+                    example: "Yen"
+                  mail:
+                    type: string
+                    pattern: '^[\w\.-]+@[\w\.-]+\.\w+$'
+                    example: "klie.yen@gmail.com"
+                  password:
+                    type: string
+                    example: "mdp"
+                  zipCode:
+                    type: integer
+                    minimum: 01000
+                    maximum: 98999
+                    example: 75600
+                  address:
+                    type: string
+                    example: "8 rue de la merguez"
+                  town:
+                    type: string
+                    pattern: "^[A-Za-zÀ-ÖØ-öø-ÿ-]+$"
+                    example: "Paris"
+  
+    customerUpdateByCustomer:
+            type: object
+            properties:
+              mail:
+                type: string
+                pattern: '^[\w\.-]+@[\w\.-]+\.\w+$'
+                example: "klie.yen@gmail.com"
+              password:
+                type: string
+                example: "mdp"
+              zipCode:
+                type: integer
+                minimum: 01000
+                maximum: 98999
+                example: 75600
+              address:
+                type: string
+                example: "8 rue de la merguez"
+              town:
+                type: string
+                pattern: "^[A-Za-zÀ-ÖØ-öø-ÿ-]+$"
+                example: "Paris"
+    employeeUpdateByEmployee:
+            type: object
+            properties:
+              mail:
+                type: string
+                pattern: '^[\w\.-]+@[\w\.-]+\.\w+$'
+                example: "hamp.loye@gmail.com"
+              password:
+                type: string
+                example: "mdp"
+    employeeUpdateByAdmin:
+            type: object
+            properties:
+              firstname:
+                type: string
+                example: "Hamp"
+              lastname:
+                type: string
+                example: "Loyé"
+              mail:
+                type: string
+                pattern: '^[\w\.-]+@[\w\.-]+\.\w+$'
+                example: "hamp.loye@gmail.com"
+              password:
+                type: string
+                example: "mdp"
+              endContract:
+                type: string
+                format: date
+                example: "2023-12-22"
+    employeeUpdateByManager:
+            type: object
+            properties:
+              endContract:
+                type: string
+                format: date
+                example: "2023-12-22"
+    foodUpdateByAdmin:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "Croissant"
+              price:
+                type: number
+                example: 3.50
+              description:
+                type: string
+                example: "It's a croissant"
+              addStock:
+                type: integer
+                example: 3
+    foodUpdateByBaker:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "Croissant"
+              description:
+                type: string
+                example: "It's a croissant"
+              addStock:
+                type: integer
+                example: 3
+    foodUpdateByCashier:
+            type: object
+            properties:
+              price:
+                type: number
+                example: 3.50
+                
+    customerList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Customer'
+    Customer:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        firstname:
+          type: string
+          example: "Klie"
+        lastname:
+          type: string
+          example: "Yen"
+        mail:
+          type: string
+          pattern: '^[\w\.-]+@[\w\.-]+\.\w+$'
+          example: "klie.yen@gmail.com"
+        password:
+          type: string
+          example: "mdp"
+        zipCode:
+          type: integer
+          minimum: 01000
+          maximum: 98999
+          example: 75600
+        address:
+          type: string
+          example: "8 rue de la merguez"
+        town:
+          type: string
+          pattern: "^[A-Za-zÀ-ÖØ-öø-ÿ-]+$"
+          example: "Paris"
+          
+    employeeList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Employee'
+    Employee:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        firstname:
+          type: string
+          example: "Hamp"
+        lastname:
+          type: string
+          example: "Loyé"
+        mail:
+          type: string
+          pattern: '^[\w\.-]+@[\w\.-]+\.\w+$'
+          example: "hamp.loye@gmail.com"
+        role:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 2
+        password:
+          type: string
+          example: "mdp"
+        endContract:
+          type: string
+          format: date
+          example: null
+    Manager:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        firstname:
+          type: string
+          example: "Hamp"
+        lastname:
+          type: string
+          example: "Loyé"
+        mail:
+          type: string
+          pattern: '^[\w\.-]+@[\w\.-]+\.\w+$'
+          example: "hamp.loye@gmail.com"
+        role:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 5
+        password:
+          type: string
+          example: "mdp"
+        endContract:
+          type: string
+          format: date
+          example: null
+    Cashier:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        firstname:
+          type: string
+          example: "Hamp"
+        lastname:
+          type: string
+          example: "Loyé"
+        mail:
+          type: string
+          pattern: '^[\w\.-]+@[\w\.-]+\.\w+$'
+          example: "hamp.loye@gmail.com"
+        role:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 4
+        password:
+          type: string
+          example: "mdp"
+        endContract:
+          type: string
+          format: date
+          example: null
+    Baker:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        firstname:
+          type: string
+          example: "Hamp"
+        lastname:
+          type: string
+          example: "Loyé"
+        mail:
+          type: string
+          pattern: '^[\w\.-]+@[\w\.-]+\.\w+$'
+          example: "hamp.loye@gmail.com"
+        role:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 3
+        password:
+          type: string
+          example: "mdp"
+        endContract:
+          type: string
+          format: date
+          example: null
+    Deliveryman:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        firstname:
+          type: string
+          example: "Hamp"
+        lastname:
+          type: string
+          example: "Loyé"
+        mail:
+          type: string
+          pattern: '^[\w\.-]+@[\w\.-]+\.\w+$'
+          example: "hamp.loye@gmail.com"
+        role:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 2
+        password:
+          type: string
+          example: "mdp"
+        endContract:
+          type: string
+          format: date
+          example: null
+          
+    foodsList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Food'
+    Food:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Croissant"
+        price:
+          type: number
+          example: 2.5
+        description:
+          type: string
+          example: "It's a croissant"
+        stock:
+          type: integer
+          example: 77
+          
+    ingredientsList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Ingredient'
+    Ingredient:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Yeast"
+        stock:
+          type: integer
+          example: 77
+          
+    purchasesList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Buy'
+    Buy:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        customerId:
+          type: integer
+          example: 5
+        deliverymanId:
+          type: integer
+          example: 6
+        foodId:
+          type: integer
+          example: 42
+        dueDate:
+          type: string
+          format: date
+          example: "2023-12-28"
+        deliveryDate:
+          type: string
+          format: date
+          example: "2024-05-23 10:27:00"
+        status:
+          type: string
+          enum:
+          - "Paid"
+          - "Cart"
+          example: "Paid"
+        validation:
+          type: boolean
+          example: true
+        qty:
+          type: integer
+          example: 18
+    BuyInCart:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        customerId:
+          type: integer
+          example: 5
+        deliverymanId:
+          type: integer
+          example: null
+        foodId:
+          type: integer
+          example: 42
+        dueDate:
+          type: string
+          format: date
+          example: "2023-12-28"
+        deliveryDate:
+          type: string
+          format: date
+          example: null
+        status:
+          type: string
+          enum:
+          - "Paid"
+          - "Cart"
+          example: "Cart"
+        validation:
+          type: boolean
+          example: false
+        qty:
+          type: integer
+          example: 18
+        
+    compositionsList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Contain'
+    Contain:
+      type: object
+      properties:
+        foodId:
+          type: integer
+          example: 1
+        ingredientId:
+          type: integer
+          example: 5
+    token:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibWFpbCI6InlhY293YW4ua2VlYnJhZHlAZ21haWwuY29tIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzAzMzk4MTI3LCJleHAiOjE3MDM0MDE3Mjd9.OOhvLQbg7G7S8LkzuYaTHf0vU_VP6q1zvJ3AuCd2N_g"
+        role:
+          type: string
+          example: "customer"
+          
+  responses:
+    notFound:
+      description: "The resource specified is not found"
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ success, message ]
+            properties:
+              success:
+                type: boolean
+                default: false
+                example: false
+              message:
+                type: string
+                default: ""
+                example: "This ressource doesn't exist"
+    accessForbidden:
+      description: "You are not authorized to go on this road"
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ success, message ]
+            properties:
+              success:
+                type: boolean
+                default: false
+                example: false
+              message:
+                type: string
+                default: ""
+                example: "Access forbidden: reason"
+    accessForbiddenLogged:
+      description: "You must be logged in to go on this road"
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ success, message ]
+            properties:
+              success:
+                type: boolean
+                default: false
+                example: false
+              message:
+                type: string
+                default: ""
+                example: "Access forbidden: You must be logged in to do this"
+    errorArg:
+      description: "Error with args"
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ success, message ]
+            properties:
+              success:
+                type: boolean
+                default: false
+                example: false
+              message:
+                type: string
+                default: ""
+                example: "Error your arg is incorrect"
+    errorProcess:
+      description: "Args correct but some requirements not met"
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ success, message ]
+            properties:
+              success:
+                type: boolean
+                default: false
+                example: false
+              message:
+                type: string
+                default: ""
+                example: "Error this condition is incorrect"
+    invalidPassword:
+      description: "The password is incorrect"
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ success, message ]
+            properties:
+              success:
+                type: boolean
+                default: false
+                example: false
+              message:
+                type: string
+                default: ""
+                example: "Password is incorrect"
+    errorPopDB:
+      description: "Error when populate db"
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ success, message ]
+            properties:
+              success:
+                type: boolean
+                default: false
+                example: false
+              message:
+                type: string
+                default: ""
+                example: "Error populating database"
+    cannotGetData:
+      description: "Cannot get results of data from extern api"
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ success, message ]
+            properties:
+              success:
+                type: boolean
+                default: false
+                example: false
+              message:
+                type: string
+                default: ""
+                example: "Cannot get results of extern data"
+                
+  securitySchemes:
+    JWT:
+      type: apiKey
+      in: header
+      name: Authorization
