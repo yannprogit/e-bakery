@@ -1,11 +1,15 @@
 //------------------------ Import ------------------------
 const express = require('express');
 const OpenApiValidator = require('express-openapi-validator');
+const cors = require('cors');
 
 //------------------------ App ------------------------
 //Init app
 const app = express();
 app.use(express.json());
+app.use(cors({
+    origin: 'http://localhost:4200'
+  }));
 
 //To use yaml
 app.use(
