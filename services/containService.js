@@ -23,7 +23,12 @@ exports.getSpecificCompositions = async (id, type) => {
         result = await db.contain.findAll({
             where: {
                 foodId: id
-            }
+            },
+            include: [{
+                model: db.ingredients,
+                as : 'containIngredient',
+                attributes: ['id', 'name']
+            }]
         });
     }
     else if (type=="ingredient") {
