@@ -428,34 +428,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/foodsList'
-          
-    post:
-      tags:
-        - Foods
-      summary: Add a new food
-      security:
-        - JWT: []
-      x-auth-roles: 
-        - admin
-        - baker
-      description: Add a new food
-      operationId: addFood
-      requestBody:
-        $ref: '#/components/requestBodies/foodCreation'
-      responses:
-        '200':
-          description: new Food successfully added to the list
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Food'          
-        '400':
-          $ref: '#/components/responses/errorArg' 
-        '401':
-          $ref: '#/components/responses/accessForbiddenLogged'
-        '403':
-          $ref: '#/components/responses/accessForbidden'
-          
+
   /foods/{id}:
     get:
       tags:
@@ -476,44 +449,6 @@ paths:
           $ref: '#/components/responses/errorArg'
         '404':
           $ref: "#/components/responses/notFound"
-          
-    put:
-      tags:
-        - Foods
-      summary: Update a food
-      security:
-        - JWT: []
-      x-auth-roles: 
-        - admin
-        - baker
-        - cashier
-      description: A baker can update the food except the price, because the cashier updates the price (and that's all he can do) and the admin can update all the information. Baker and Admin can also add stock with update
-      operationId: updateFood
-      parameters:
-        - $ref: '#/components/parameters/idInPath'
-      requestBody:
-        description: Update food information
-        required: true
-        content:
-          application/json:
-            schema:
-              anyOf:
-              - $ref: '#/components/schemas/foodUpdateByBaker'
-              - $ref: '#/components/schemas/foodUpdateByAdmin'
-              - $ref: '#/components/schemas/foodUpdateByCashier'
-      responses:
-        '204':
-          description: successful operation
-        '400':
-          $ref: '#/components/responses/errorArg' 
-        '404':
-          $ref: "#/components/responses/notFound"
-        '401':
-          $ref: '#/components/responses/accessForbiddenLogged'
-        '403':
-          $ref: '#/components/responses/accessForbidden'
-        '422':
-          $ref: "#/components/responses/errorProcess"
           
     delete:
         tags:

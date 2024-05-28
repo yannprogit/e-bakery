@@ -1,6 +1,7 @@
 //------------- Import -------------
 const db = require('../models/index.js');
 const { Op } = require('sequelize');
+require('dotenv').config();
 
 //------------- Methods -------------
 
@@ -206,6 +207,18 @@ exports.updateFoodByBaker = async (id, name, description, addStock) => {
 exports.updatePrice = async (id, price) => {
     return await db.foods.update({
         price
+    }, 
+    { where: {
+            id
+        }
+    });
+}
+
+//Update the food's image
+exports.updateFoodImage = async (id) => {
+    const imageUrl = process.env.url + "/foods/" + id + "/image"
+    return await db.foods.update({
+        image: imageUrl
     }, 
     { where: {
             id

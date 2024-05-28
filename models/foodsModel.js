@@ -23,6 +23,10 @@ module.exports = (sequelize) => {
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
+    image: {
+      type: DataTypes.STRING,
+      defaultValue: "http://localhost:8000/foods/0/image",
+    },
   });
     return food;
 };
