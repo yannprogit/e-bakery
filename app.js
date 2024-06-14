@@ -46,6 +46,7 @@ const loginRouter = require('./routers/loginRouter.js');
 app.use('/login', loginRouter);
 
 app.use((error, req, res, next) => {
+    console.log('Error: ', error.message);
     res.status(error.status || 500).json({success: false, message: error.message});
 });
 
