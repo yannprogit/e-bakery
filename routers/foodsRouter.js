@@ -8,6 +8,8 @@ const upload = multer({ dest: '../images/' });
 //------------- Routes -------------
 router.get('/', foodController.getFoods);
 
+router.get('/random/3', foodController.getThreeFoods);
+
 router.get('/:id', foodController.getFoodById);
 
 router.post('/', authMiddleware(['admin','baker']), upload.single('image'), (req, res) => {

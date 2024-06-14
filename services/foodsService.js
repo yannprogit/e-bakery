@@ -10,6 +10,14 @@ exports.getFoods = async () => {
     return await db.foods.findAll();
 }
 
+//Return 3 random foods
+exports.getThreeFoods = async () => {
+    return await db.foods.findAll({
+        order: db.sequelize.literal('RAND()'),
+        limit: 3
+    });
+}
+
 //Add a food
 exports.addFood = (name, price, description, stock) => {
     if (stock<0) {

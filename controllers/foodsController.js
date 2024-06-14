@@ -1,5 +1,5 @@
 //------------- Import -------------
-const { getFoods, addFood, getFoodById, deleteFoodById, updateFoodByAdmin, updatePrice, updateFoodByBaker, updateFoodImage } = require('../services/foodsService.js');
+const { getFoods, getThreeFoods, addFood, getFoodById, deleteFoodById, updateFoodByAdmin, updatePrice, updateFoodByBaker, updateFoodImage } = require('../services/foodsService.js');
 //const Ajv = require('ajv');
 //const ajv = new Ajv();
 const path = require('path');
@@ -9,6 +9,12 @@ const fs = require('fs');
 //Get the list of foods
 exports.getFoods = async (req, res) => {
     const foods = await getFoods();
+    res.status(200).json({success: true, data: foods});
+}
+
+//Get the 3 random foods
+exports.getThreeFoods = async (req, res) => {
+    const foods = await getThreeFoods();
     res.status(200).json({success: true, data: foods});
 }
 
@@ -32,7 +38,7 @@ exports.addFood = async (req, res) => {
             res.status(400).json({success: false, message: "The stock must be over 0"});
         }
     } else {
-        res.status(400).json({success: false, message: "You must put image"});
+        res.status(400).json({success: false, message: "You must put an image"});
     }
 }
 
