@@ -121,7 +121,9 @@ exports.updateCustomerByCustomer = async (id, mail, password, zipCode, address, 
             id
         }
     });
-
+    if (password==""||password==null) {
+        password = customer.password;
+    }
     let mailExist = false;
     if (mail!=customer.mail) {
         mailExist = await db.customers.findOne({

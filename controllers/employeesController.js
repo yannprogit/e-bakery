@@ -80,10 +80,10 @@ exports.updateEmployeeById = async (req, res, id, role) => {
               firstname: { type: 'string' },
               lastname: { type: 'string' },
               mail: { type: 'string' },
-              password: { type: 'string' },
+              password: { type: ['string', 'null'] },
               endContract: { type: ['string', 'null'] },
             },
-            required: ['firstname', 'lastname', 'mail', 'password'],
+            required: ['firstname', 'lastname', 'mail'],
           };
         const validateBody = ajv.validate(schema, req.body);
         const format = /^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}:\d{2})?$/;
@@ -94,7 +94,7 @@ exports.updateEmployeeById = async (req, res, id, role) => {
             res.status(400).json({ success: false, message: 'endContract must be a valid date' });
         }
         else {
-            const employee = await updateEmployeeByAdmin(req.params.id, req.body.firstname, req.body.lastname, req.body.mail, await bcrypt.hash(req.body.password, 10), req.body.endContract);
+            const employee = await updateEmployeeByAdmin(req.params.id, req.body.firstname, req.body.lastname, req.body.mail, req.body.password ? await bcrypt.hash(req.body.password, 10) : null, req.body.endContract);
             if (employee) {
                 res.status(204).send();
             }
@@ -145,16 +145,16 @@ exports.updateEmployeeById = async (req, res, id, role) => {
             type: 'object',
             properties: {
               mail: { type: 'string', pattern: '^[^@\s]+@[^@\s]+\.[^@\s]+$' },
-              password: { type: 'string' }
+              password: { type: ['string', 'null'] }
             },
-            required: ['mail', 'password'],
+            required: ['mail'],
           };
         const validateBody = ajv.validate(schema, req.body);
         if (!validateBody) {
             res.status(400).json({success: false, message: ajv.errors});
         }
         else {
-            const employee = await updateEmployeeByEmployee(req.params.id, req.body.mail, await bcrypt.hash(req.body.password, 10));
+            const employee = await updateEmployeeByEmployee(req.params.id, req.body.mail, req.body.password ? await bcrypt.hash(req.body.password, 10) : null);
             if (employee) {
                 res.status(204).send(); 
             }

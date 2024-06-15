@@ -68,19 +68,19 @@ exports.updateCustomerById = async (req, res, id, role) => {
               firstname: { type: 'string' },
               lastname: { type: 'string' },
               mail: { type: 'string' },
-              password: { type: 'string' },
+              password: { type: ['string', 'null'] },
               zipCode: {type: 'integer' },
               address: { type: 'string' },
               town: { type: 'string' },
             },
-            required: ['firstname', 'lastname', 'mail', 'password', 'zipCode', 'address', 'town'],
+            required: ['firstname', 'lastname', 'mail', 'zipCode', 'address', 'town'],
           };
         const validateBody = ajv.validate(schema, req.body);
         if (!validateBody) {
             res.status(400).json({success: false, message: ajv.errors});
         }
         else {
-            const customer = await updateCustomerByAdmin(req.params.id, req.body.firstname, req.body.lastname, req.body.mail, await bcrypt.hash(req.body.password, 10), req.body.zipCode, req.body.address, req.body.town);
+            const customer = await updateCustomerByAdmin(req.params.id, req.body.firstname, req.body.lastname, req.body.mail, req.body.password ? await bcrypt.hash(req.body.password, 10) : null, req.body.zipCode, req.body.address, req.body.town);
             if (customer) {
                 res.status(204).send();
             }
@@ -94,19 +94,19 @@ exports.updateCustomerById = async (req, res, id, role) => {
             type: 'object',
             properties: {
               mail: { type: 'string' },
-              password: { type: 'string' },
+              password: { type: ['string', 'null'] },
               zipCode: {type: 'integer' },
               address: { type: 'string' },
               town: { type: 'string' },
             },
-            required: ['mail', 'password', 'zipCode', 'address', 'town'],
+            required: ['mail', 'zipCode', 'address', 'town'],
           };
         const validateBody = ajv.validate(schema, req.body);
         if (!validateBody) {
             res.status(400).json({success: false, message: ajv.errors});
         }
         else {
-            const customer = await updateCustomerByCustomer(req.params.id, req.body.mail, await bcrypt.hash(req.body.password, 10), req.body.zipCode, req.body.address, req.body.town);
+            const customer = await updateCustomerByCustomer(req.params.id, req.body.mail, req.body.password ? await bcrypt.hash(req.body.password, 10) : null, req.body.zipCode, req.body.address, req.body.town);
             if (customer) {
                 res.status(204).send();
             }

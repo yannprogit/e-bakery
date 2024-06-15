@@ -99,7 +99,9 @@ exports.updateEmployeeByAdmin = async (id, firstname, lastname, mail, password, 
             id
         }
     });
-    
+    if (password==""||password==null) {
+        password = employee.password;
+    }
     let mailExist = false;
     if (mail!=employee.mail) {
         mailExist = await db.employees.findOne({
@@ -133,7 +135,9 @@ exports.updateEmployeeByEmployee = async (id, mail, password) => {
             id
         }
     });
-    
+    if (password==""||password==null) {
+        password = employee.password;
+    }
     let mailExist = false;
     if (mail!=employee.mail) {
         mailExist = await db.employees.findOne({
