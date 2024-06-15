@@ -9,6 +9,24 @@ exports.getPurchases = async () => {
     return await db.buy.findAll();
 }
 
+exports.getCart = async (customerId) => {
+    return await db.buy.findAll({
+        where: {
+            customerId,
+            status: 'cart'
+        }
+    });
+}
+
+exports.getPaidPurchases = async (customerId) => {
+    return await db.buy.findAll({
+        where: {
+            customerId,
+            status: 'paid'
+        }
+    });
+}
+
 //Add a purchase (in cart)
 exports.addBuy = (customerId, foodId, qty) => {
     return db.buy.create({

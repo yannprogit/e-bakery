@@ -1,11 +1,21 @@
 //------------- Import -------------
-const { getPurchases, addBuy, getBuyById, deleteBuyById, updateDeliveryDate, updateStatus, updateValidation } = require('../services/buyService.js');
+const { getPurchases, getCart, getPaidPurchases, addBuy, getBuyById, deleteBuyById, updateDeliveryDate, updateStatus, updateValidation } = require('../services/buyService.js');
 const { getFoodById } = require('../services/foodsService.js');
 
 //------------- Methods -------------
 //Get the list of purchases
 exports.getPurchases = async (req, res) => {
     const buy = await getPurchases();
+    res.status(200).json({success: true, data: buy});
+}
+
+exports.getCart = async (req, res) => {
+    const buy = await getCart(req.user.id);
+    res.status(200).json({success: true, data: buy});
+}
+
+exports.getPaidPurchases = async (req, res) => {
+    const buy = await getPaidPurchases(req.user.id);
     res.status(200).json({success: true, data: buy});
 }
 

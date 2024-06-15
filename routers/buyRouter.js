@@ -12,6 +12,14 @@ router.post('/', authMiddleware(['customer']), (req, res) => {
     buyController.addBuy(req, res);
 });
 
+router.get('/cart/all', authMiddleware(['customer']), (req, res) => {
+    buyController.getCart(req, res);
+});
+
+router.get('/paid/all', authMiddleware(['customer']), (req, res) => {
+    buyController.getPaidPurchases(req, res);
+});
+
 router.get('/:id', authMiddleware(['customer', 'deliveryman', 'admin']), (req, res) => {
     buyController.getBuyById(req, res, req.user.id, req.user.role);
 });
