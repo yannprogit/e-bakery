@@ -1,5 +1,5 @@
 //------------- Import -------------
-const { getPurchases, getCart, getPaidPurchases, addBuy, getBuyById, deleteBuyById, updateDeliveryDate, updateStatus, updateValidation } = require('../services/buyService.js');
+const { getPurchases, getDeliveries, getCart, getPaidPurchases, addBuy, getBuyById, deleteBuyById, updateDeliveryDate, updateStatus, updateValidation } = require('../services/buyService.js');
 const { getFoodById } = require('../services/foodsService.js');
 
 //------------- Methods -------------
@@ -11,6 +11,11 @@ exports.getPurchases = async (req, res) => {
 
 exports.getCart = async (req, res) => {
     const buy = await getCart(req.user.id);
+    res.status(200).json({success: true, data: buy});
+}
+
+exports.getDeliveries = async (req, res) => {
+    const buy = await getDeliveries(req.user.id);
     res.status(200).json({success: true, data: buy});
 }
 

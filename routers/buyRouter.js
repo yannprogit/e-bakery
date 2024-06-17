@@ -16,6 +16,10 @@ router.get('/cart/all', authMiddleware(['customer']), (req, res) => {
     buyController.getCart(req, res);
 });
 
+router.get('/deliveries/all', authMiddleware(['deliveryman']), (req, res) => {
+    buyController.getDeliveries(req, res);
+});
+
 router.get('/paid/all', authMiddleware(['customer']), (req, res) => {
     buyController.getPaidPurchases(req, res);
 });

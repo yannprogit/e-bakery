@@ -18,6 +18,15 @@ exports.getCart = async (customerId) => {
     });
 }
 
+exports.getDeliveries = async (deliverymanId) => {
+    return await db.buy.findAll({
+        where: {
+            deliverymanId
+        },
+        order: [['dueDate', 'DESC']]
+    });
+}
+
 exports.getPaidPurchases = async (customerId) => {
     return await db.buy.findAll({
         where: {
