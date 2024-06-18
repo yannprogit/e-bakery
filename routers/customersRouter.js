@@ -4,7 +4,7 @@ const customerController = require('../controllers/customersController');
 const { authMiddleware } = require('../controllers/loginController');
 
 //------------- Routes -------------
-router.get('/', authMiddleware(['admin']), (req, res) => {
+router.get('/', authMiddleware(['admin', 'deliveryman']), (req, res) => {
     customerController.getCustomers(req, res);
 });
 

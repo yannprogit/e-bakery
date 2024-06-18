@@ -112,6 +112,26 @@ exports.updateFoodById = async (req, res, role) => {
         }
         else {*/
             console.log("name : ", req.body.name, " ", "price : ",req.body.price);
+            if (req.file) {
+                await updateFoodImage(req.params.id);
+                const imageFilePath = path.join(__dirname, '..', 'images', req.params.id + ".png");
+                fs.access(imageFilePath, fs.constants.F_OK, (err) => {
+                    if (err) {
+                        fs.renameSync(req.file.path, imageFilePath);
+                        res.status(204).send();
+                    } else {
+                        fs.unlink(imageFilePath, (err) => {
+                            if (err) {
+                                res.status(500).json({ success: false, message: "Error by updating image" });
+                            } else {
+                                fs.renameSync(req.file.path, imageFilePath);
+                                res.status(204).send();
+                            }
+                        });
+                    }
+                });
+            }
+
             const food = await updateFoodByAdmin(req.params.id, req.body.name, price, req.body.description, addStock !== undefined ? req.body.addStock : 0);
             if (food=="negStock") {
                 res.status(400).json({success: false, message: "The addition of stock must be over 0"});
@@ -119,31 +139,8 @@ exports.updateFoodById = async (req, res, role) => {
             else if (food=="noCompositions") {
                 res.status(422).json({success: false, message: "You must add compositions to this food to be able to add stocks"});
             }
-            else if (!food) {
-                res.status(422).json({success: false, message: "There aren't enough ingredients left to increase the stock of this food"});
-            }
             else {
-                if (req.file) {
-                    await updateFoodImage(req.params.id);
-                    const imageFilePath = path.join(__dirname, '..', 'images', req.params.id + ".png");
-                    fs.access(imageFilePath, fs.constants.F_OK, (err) => {
-                        if (err) {
-                            fs.renameSync(req.file.path, imageFilePath);
-                            res.status(204).send();
-                        } else {
-                            fs.unlink(imageFilePath, (err) => {
-                                if (err) {
-                                    res.status(500).json({ success: false, message: "Error by updating image" });
-                                } else {
-                                    fs.renameSync(req.file.path, imageFilePath);
-                                    res.status(204).send();
-                                }
-                            });
-                        }
-                    });
-                } else {
-                    res.status(500).json({ success: false, message: "There is no image" });
-                }
+                res.status(422).json({success: false, message: "There aren't enough ingredients left to increase the stock of this food"});
             }
         //}
     }
